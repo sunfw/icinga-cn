@@ -1,0 +1,284 @@
+###############################################################################
+# WINDOWS.CFG - SAMPLE CONFIG FILE FOR MONITORING A WINDOWS MACHINE
+#
+# NOTES: This config file assumes that you are using the sample configuration
+#	 files that get installed with the Icinga quickstart guide.
+#
+###############################################################################
+
+
+
+
+###############################################################################
+###############################################################################
+#
+# HOST DEFINITIONS
+#
+###############################################################################
+###############################################################################
+
+# Define a host for the Windows machine we'll be monitoring
+# Change the host_name, alias, and address to fit your situation
+
+define host{
+	use		windows-server	; Inherit default values from a template
+	host_name	winserver	; The name we're giving to this host
+	alias		My Windows Server	; A longer name associated with the host
+	icon_image              win40.gif
+    statusmap_image         win40.gd2
+	address		192.168.1.2	; IP address of the host
+	}
+
+
+
+
+###############################################################################
+###############################################################################
+#
+# HOST GROUP DEFINITIONS
+#
+###############################################################################
+###############################################################################
+
+
+# Define a hostgroup for Windows machines
+# All hosts that use the windows-server template will automatically be a member of this group
+
+define hostgroup{
+	hostgroup_name	windows-servers	; The name of the hostgroup
+	alias		Windows Servers	; Long name of the group
+	members      winserver  ; Comma separated list of hosts that belong to this group
+	}
+
+
+
+
+###############################################################################
+###############################################################################
+#
+# SERVICE DEFINITIONS
+#
+###############################################################################
+###############################################################################
+
+
+# Create a service for monitoring the version of NSCLient++ that is installed
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	hostgroup_name   windows-servers
+	service_description	NSClient++ Version
+	check_command		check_nt!CLIENTVERSION
+	}
+
+
+
+# Create a service for monitoring the uptime of the server
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Uptime
+	check_command		check_nt!UPTIME
+	}
+
+
+
+# Create a service for monitoring CPU load
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	hostgroup_name   windows-servers
+	service_description	CPU Load
+	check_command		check_nt!CPULOAD!-l 5,80,90
+	}
+
+
+
+# Create a service for monitoring memory usage
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	hostgroup_name   windows-servers
+	service_description	Memory Usage
+	check_command		check_nt!MEMUSE!-w 80 -c 90
+	}
+
+
+
+# Create a service for monitoring C:\ disk usage
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	C:\ Drive Space
+	check_command		check_nt!USEDDISKSPACE!-l c -w 80 -c 90
+	}
+
+
+
+# Create a service for monitoring the W3SVC service
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	W3SVC
+	check_command		check_nt!SERVICESTATE!-d SHOWALL -l W3SVC
+	}
+
+
+
+# Create a service for monitoring the Explorer.exe process
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Explorer
+	check_command		check_nt!PROCSTATE!-d SHOWALL -l Explorer.exe
+	}
+
+# Create a service for monitoring Service State
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Service State
+	check_command		check_nt!SERVICESTATE!-l Spooler
+	}
+	
+	
+# Create a service for monitoring Process State
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Process State
+	check_command		check_nt!PROCSTATE!-d SHOWALL　-l gmond.exe
+	}
+	
+# Create a service for monitoring Process
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Process
+	check_command		check_nt!INSTANCES!-d SHOWALL　-l "\\Processor(_total)\\% Processor Time","Process: %.f"
+#	check_command		check_nt!INSTANCES!-d SHOWALL　-l "\\Processor(lsass)\\% Processor Time"."Lsass: %.f" -w 50 -c 80
+	}
+	
+# Create a service for Disk I/O
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Disk I/O
+	check_command		check_nt!COUNTER!-d SHOWALL　-l "\\PhysicalDisk(_Total)\\% Disk Time","Disk: %.2f" -w 50 -c 80
+	}
+	
+# Create a service for Memory_pages
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Memory_pages
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\Memory\\Pages/sec","Pages per Sec is %.f" -w 10 -c 20
+	}
+	
+# Create a service for Process_thread
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Process_thread
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\Process(_Total)\\Thread Count","Thread Count: %.f" -w 600 -c 800
+	}
+	
+     
+# Create a service for Server Sessions
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Server Sessions
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\Server\\Server Sessions","Server Sessions: %.f" -w 20 -c 30
+	}     
+	
+	
+	     
+# Create a service for network interface
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Network Interface
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\Network Interface(Marvel Gigabit Ethernet Controller - Packet Scheduler Miniport)\\Bytes Total/sec","NIC1" -w 500 -c 800
+	} 
+	
+	
+# Create a service for mssql_transactions
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Mssql_Transactions
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\SQLServer:Databases(_Total)\\Transactions/sec","SQLServer:Databases(_Total) Transactions/sec is %.f " -w 20 -c 50
+	}
+	
+	
+# Create a service for Memory Grants Pending
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Memory_Grants_Pending
+	check_command		check_nt!COUNTER!-d SHOWALL "\\SQLServer:Memory Manager\\Memory Grants Pending","SQLServer:Memory Manager Memory Grants Pending is %.f " -w 100 -c 200
+	}
+	
+	
+# Create a service for exchange_mailrq
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Exchange_Mailrq
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS Mailbox(_Total)\\Receive Queue Size","Receive Queue Size is %.f " -w 50 -c 100
+	}
+	
+# Create a service for exchange_mailsq
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	Exchange_Mailsq
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS Mailbox(_Total)\\Send Queue Size","Send Queue Size is %.f " -w 50 -c 100
+	}
+	
+	
+# Create a service for MSExchangeIS
+# Change the host_name to match the name of the host you defined above
+
+define service{
+	use			generic-service
+	host_name		winserver
+	service_description	MSExchangeIS
+	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS\RPC Operations/sec","RPC: %.f" -w 300  -c 400
+	}

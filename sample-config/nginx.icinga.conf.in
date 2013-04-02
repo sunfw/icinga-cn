@@ -1,0 +1,21 @@
+# Icinga Classic - Configuration
+    location @htmurl@ {
+        alias   @datadir@;
+        index  index.html;
+        auth_basic              "Icinga Access";
+        auth_basic_user_file    @HTTPAUTHFILE@;
+    }
+
+    location ~ @htmurl@/(.*)\.cgi$ {
+        root @sbindir@;
+        rewrite ^@cgiurl@/(.*)\.cgi /$1.cgi break;
+        include /etc/nginx/fastcgi_params;
+        fastcgi_pass  unix:/var/run/fcgiwrap.socket;
+        fastcgi_index index.php;
+        fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        auth_basic              "Icinga Access";
+        auth_basic_user_file    @HTTPAUTHFILE@;
+        fastcgi_param  AUTH_USER          $remote_user;
+        fastcgi_param  REMOTE_USER        $remote_user;
+    }
+

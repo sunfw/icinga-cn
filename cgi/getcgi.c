@@ -1,0 +1,312 @@
+/*****************************************************************************
+ *
+ * GETCGI.C -  Icinga CGI Input Routines
+ *
+ * Copyright (c) 1999-2009 Ethan Galstad (egalstad@nagios.org)
+ * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ *
+ * License:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ *****************************************************************************/
+
+#include "../include/config.h"
+#include "../include/getcgi.h"
+#include "../include/cgiutils.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+
+#undef PARANOID_CGI_INPUT
+
+
+/* Remove potentially harmful characters from CGI input that we don't need or want */
+void sanitize_cgi_input(char **cgivars) {
+	char *strptr;
+	int x, y, i;
+	int keep;
+
+	/* don't strip for now... */
+	return;
+
+	for (strptr = cgivars[i=0]; strptr != NULL; strptr = cgivars[++i]) {
+
+		for (x = 0, y = 0; strptr[x] != '\x0'; x++) {
+
+			keep = 1;
+
+			/* remove potentially nasty characters */
+			if (strptr[x] == ';' || strptr[x] == '|' || strptr[x] == '&' || strptr[x] == '<' || strptr[x] == '>')
+				keep = 0;
+#ifdef PARANOID_CGI_INPUT
+			else if (strptr[x] == '/' || strptr[x] == '\\')
+				keep = 0;
+#endif
+			if (keep == 1)
+				strptr[y++] = strptr[x];
+		}
+
+		strptr[y] = '\x0';
+	}
+
+	return;
+}
+
+
+/* convert encoded hex string (2 characters representing an 8-bit number) to its ASCII char equivalent */
+unsigned char hex_to_char(char *input) {
+	unsigned char outchar = '\x0';
+	unsigned int outint;
+	char tempbuf[3];
+
+	/* NULL or empty string */
+	if (input == NULL)
+		return '\x0';
+	if (input[0] == '\x0')
+		return '\x0';
+
+	tempbuf[0] = input[0];
+	tempbuf[1] = input[1];
+	tempbuf[2] = '\x0';
+
+	sscanf(tempbuf, "%X", &outint);
+
+	/* only convert "normal" ASCII characters - we don't want the rest.  Normally you would
+	   convert all characters (i.e. for allowing users to post binary files), but since we
+	   aren't doing this, stay on the cautious side of things and reject outsiders... */
+#ifdef PARANOID_CGI_INPUT
+	if (outint < 32 || outint > 126)
+		outint = 0;
+#endif
+
+	outchar = (unsigned char)outint;
+
+	return outchar;
+}
+
+
+
+/* unescape hex characters and plus in CGI input */
+void unescape_cgi_input(char *input) {
+	int x, y;
+	int len;
+
+	if (input == NULL)
+		return;
+
+	len = strlen(input);
+	for (x = 0, y = 0; x < len; x++, y++) {
+
+		if (input[x] == '\x0')
+			break;
+		else if (input[x] == '%') {
+			input[y] = hex_to_char(&input[x+1]);
+			x += 2;
+		// RB 2011-09-08
+		// convert plus as well that it can bu used in service and host names
+		} else if (input[x] == '+') {
+				input[y] = ' ';
+		} else
+			input[y] = input[x];
+	}
+	input[y] = '\x0';
+
+	return;
+}
+
+
+
+/* read the CGI input and place all name/val pairs into list. returns list containing name1, value1, name2, value2, ... , NULL */
+/* this is a hacked version of a routine I found a long time ago somewhere - can't remember where anymore */
+char **getcgivars(void) {
+	register int i;
+	char *request_method;
+	char *content_type;
+	char *content_length_string;
+	int content_length;
+	char *cgiinput;
+	char **cgivars;
+	char **pairlist;
+	int paircount;
+	char *nvpair;
+	char *eqpos;
+
+	/* initialize char variable(s) */
+	cgiinput = "";
+
+	/* depending on the request method, read all CGI input into cgiinput */
+
+	request_method = getenv("REQUEST_METHOD");
+	if (request_method == NULL)
+		request_method = "";
+
+	if (!strcmp(request_method, "GET") || !strcmp(request_method, "HEAD")) {
+
+		/* check for NULL query string environment variable - 04/28/00 (Ludo Bosmans) */
+		if (getenv("QUERY_STRING") == NULL) {
+			cgiinput = (char *)malloc(1);
+			if (cgiinput != NULL) {
+				cgiinput[0] = '\x0';
+			}
+		} else
+			cgiinput = strdup(getenv("QUERY_STRING"));
+			if (cgiinput == NULL) {
+				printf("getcgivars(): 无法分配CGI输入内存.\n");
+				exit(1);
+			}
+	}
+
+	else if (!strcmp(request_method, "POST") || !strcmp(request_method, "PUT")) {
+
+		/* if CONTENT_TYPE variable is not specified, RFC-2068 says we should assume it is "application/octet-string" */
+		/* mobile (WAP) stations generate CONTENT_TYPE with charset, we we should only check first 33 chars */
+
+		content_type = getenv("CONTENT_TYPE");
+		if (content_type == NULL)
+			content_type = "";
+
+		if (strlen(content_type) && strncasecmp(content_type, "application/x-www-form-urlencoded", 33)) {
+			printf("getcgivars(): 不支持的内容类型.\n");
+			exit(1);
+		}
+
+		content_length_string = getenv("CONTENT_LENGTH");
+		if (content_length_string == NULL)
+			content_length_string = "0";
+
+		if (!(content_length = atoi(content_length_string))) {
+			printf("getcgivars(): 没有内容长度发送POST请求.\n") ;
+			exit(1);
+		}
+		/* suspicious content length */
+		if ((content_length < 0) || (content_length >= INT_MAX - 1)) {
+			printf("getcgivars():可疑内容长度发送的POST请求.\n");
+			exit(1);
+		}
+
+		if (!(cgiinput = (char *)malloc(content_length + 1))) {
+			printf("getcgivars(): 无法分配CGI输入内存.\n");
+			exit(1);
+		}
+		if (!fread(cgiinput, content_length, 1, stdin)) {
+			printf("getcgivars(): 无法读取STDIN输入.\n");
+			exit(1);
+		}
+		cgiinput[content_length] = '\0';
+	} else {
+
+		printf("getcgivars(): Unsupported REQUEST_METHOD -> '%s'\n", request_method);
+		printf("\n");
+		printf("猜想你试图在命令行方式下运行这个cgi程序？如果真是这样，得设置环境变量\n");
+		printf("REQUEST_METHOD，可以是\"GET\"、\"HEAD\"或\"POST\"，如果是GET或HEAD时，还要\n");
+		printf("设置环境变量QUERY_STRING值，如果是\"PUT\"，数据块是从STDIN里读入的。如果\n");
+		printf("配置了CGI的授权，要在环境变量REMOTE_USER里设置授权人的名字。\n就像这样：\n");
+		printf("\n");
+
+		exit(1);
+	}
+
+	/* first, split on ampersands (&) to extract the name-value pairs into pairlist */
+	/* allocate memory for 256 name-value pairs at a time, increasing by same
+	   amount as necessary... */
+	pairlist = (char **)malloc(256 * sizeof(char **));
+	if (pairlist == NULL) {
+		printf("getcgivars(): 无法分配名称-值对列表的内存.\n");
+		exit(1);
+	}
+	paircount = 0;
+	nvpair = strtok(cgiinput, "&");
+	while (nvpair) {
+		pairlist[paircount] = strdup(nvpair);
+		if(pairlist[paircount++] == NULL) {
+			printf("getcgivars(): 无法分配名称-值对元素 #%d 的内存.\n", paircount);
+			exit(1);
+		}
+		if (paircount > MAX_CGI_INPUT_PAIRS)
+			break;
+		if (!(paircount % 256)) {
+			pairlist = (char **)realloc(pairlist, (paircount + 256) * sizeof(char **));
+			if (pairlist == NULL) {
+				printf("getcgivars():无法重新分配名称-值对列表的内存.\n");
+				exit(1);
+			}
+		}
+		nvpair = strtok(NULL, "&");
+	}
+
+	/* terminate the list */
+	pairlist[paircount] = '\x0';
+
+	/* extract the names and values from the pairlist */
+	cgivars = (char **)malloc((paircount * 2 + 1) * sizeof(char **));
+	if (cgivars == NULL) {
+		printf("getcgivars(): 无法分配名称-值对列表的内存.\n");
+		exit(1);
+	}
+	for (i = 0; i < paircount; i++) {
+
+		/* get the variable name preceding the equal (=) sign */
+		if ((eqpos = strchr(pairlist[i], '=')) != NULL) {
+			*eqpos = '\0';
+			cgivars[i*2+1] = strdup(eqpos + 1);
+			if(cgivars[i*2+1] == NULL) {
+				printf("getcgivars(): 无法分配对cgi参数值 #%d 的内存.\n", i);
+				exit(1);
+			}
+			unescape_cgi_input(cgivars[i*2+1]);
+		} else
+			cgivars[i*2+1] = strdup("");
+			if(cgivars[i*2+1] == NULL) {
+				printf("getcgivars(): 无法分配对cgi参数值 #%d 的内存.\n", i);
+				exit(1);
+			}
+			unescape_cgi_input(cgivars[i*2+1]);
+
+		/* get the variable value (or name/value of there was no real "pair" in the first place) */
+		cgivars[i*2] = strdup(pairlist[i]);
+		if(cgivars[i*2] == NULL) {
+			printf("getcgivars(): 无法分配对cgi参数值 #%d 的内存.\n", i);
+			exit(1);
+		}
+		unescape_cgi_input(cgivars[i*2]);
+	}
+
+	/* terminate the name-value list */
+	cgivars[paircount*2] = '\x0';
+
+	/* free allocated memory */
+	free(cgiinput);
+	for (i = 0; pairlist[i] != NULL; i++)
+		free(pairlist[i]);
+	free(pairlist);
+
+	/* sanitize the name-value strings */
+	sanitize_cgi_input(cgivars);
+
+	/* return the list of name-value strings */
+	return cgivars;
+}
+
+
+
+/* free() memory allocated to storing the CGI variables */
+void free_cgivars(char **cgivars) {
+	register int x;
+
+	for (x = 0; cgivars[x] != '\x0'; x++)
+		free(cgivars[x]);
+
+	return;
+}

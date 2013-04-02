@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Web监控界面</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="Content-Language" content="en" />
+	<meta name="robots" content="noindex, nofollow" />
+	<link rel="stylesheet" type="text/css" href="stylesheets/menu.css" media="screen, projection" />
+	<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico" />
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/menu.min.js"></script>
+</head>
+<body>
+	<div id="menu">
+		<h2>常规</h2>
+		<ul>
+			<li class="menuli_style1"><a href="main.html" target="main">主页</a></li>
+			<li class="menuli_style2">
+				<div class="flag">文档
+					<a class="flag" href="docs/de/index.html" target="main"><img src="docs/images/flags/de.png" /></a>
+					<a class="flag" href="docs/en/index.html" target="main"><img src="docs/images/flags/um_gb.png" /></a>
+					<a class="flag" href="docs/cn/index.html" target="main"><img src="docs/images/flags/cn.png" /></a>
+				</div>
+			</li>
+			<!-- classic search -->
+			<li class="menuli_style3">搜索:</li>
+			<li class="menuli_style2">
+			<div class="navbarsearch">
+			<form method="get" action="@cgiurl@/status.cgi" target="main">
+			<input type='text' name='search_string' style="width: 150px; padding: 2px; margin-left: 10px; border: 1px solid grey">
+			</form>
+			</div>
+			</li>
+		</ul>
+		<h2>状态</h2>
+		<ul>
+			<li class="menuli_style1"><a href="@cgiurl@/tac.cgi" target="main">总体概述</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/status.cgi?style=hostdetail" target="main">主机详情</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/status.cgi" target="main">服务详情</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/status.cgi?hostgroup=all&style=overview" target="main">主机组概述</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/status.cgi?hostgroup=all&style=summary" target="main">主机组摘要</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/status.cgi?servicegroup=all&style=overview" target="main">服务组概述</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/status.cgi?servicegroup=all&style=summary" target="main">服务组摘要</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/statusmap.cgi?host=all" target="main">状态图</a></li>			
+		</ul>
+		<h2>故障</h2>
+		<ul>
+			<li class="menuli_style1"><a href="@cgiurl@/status.cgi?servicestatustypes=28" target="main">服务故障</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/status.cgi?servicestatustypes=28&hoststatustypes=3&serviceprops=2097162" target="main">未处理的服务</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/status.cgi?style=hostdetail&hoststatustypes=12" target="main">主机故障</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/status.cgi?style=hostdetail&hoststatustypes=12&hostprops=2097162" target="main">未处理的主机</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/status.cgi?allunhandledproblems" target="main">所有未处理故障</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/status.cgi?allproblems" target="main">所有故障</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/outages.cgi" target="main">网络中断</a></li>
+		</ul>
+		<h2>系统</h2>
+		<ul>
+			<li class="menuli_style1"><a href="@cgiurl@/extinfo.cgi?&type=3" target="main">注释</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/extinfo.cgi?&type=6" target="main">宕机</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/extinfo.cgi?&type=0" target="main">进程信息</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/extinfo.cgi?&type=4" target="main">性能信息</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/extinfo.cgi?&type=7" target="main">检查调度队列</a></li>
+		</ul>
+		<h2>报告</h2>
+		<ul>
+			<li class="menuli_style1"><a href="@cgiurl@/trends.cgi" target="main">趋势</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/avail.cgi" target="main">可用性</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/histogram.cgi" target="main">警告柱状图</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/history.cgi?host=all" target="main">警告历史</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/summary.cgi" target="main">警告摘要</a></li>
+			<li class="menuli_style2"><a href="@cgiurl@/notifications.cgi?contact=all" target="main">通知</a></li>
+			<li class="menuli_style1"><a href="@cgiurl@/showlog.cgi" target="main">事件日志</a></li>
+		</ul>
+		<h2>配置</h2>
+		<ul>
+			<li class="menuli_style1"><a href="@cgiurl@/config.cgi" target="main">查看配置</a></li>
+		</ul>
+	</div>
+</body>
+</html>
