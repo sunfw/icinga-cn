@@ -371,9 +371,9 @@ int main(void) {
 		else if (display_type == DISPLAY_TIMEPERIODS)		printf("周期");
 		else if (display_type == DISPLAY_COMMANDS)		printf("命令");
 		else if (display_type == DISPLAY_SERVICEDEPENDENCIES)	printf("服务依赖关系");
-		else if (display_type == DISPLAY_SERVICEESCALATIONS)	printf("服务升级");
+		else if (display_type == DISPLAY_SERVICEESCALATIONS)	printf("服务增强");
 		else if (display_type == DISPLAY_HOSTDEPENDENCIES)	printf("主机依赖关系");
-		else if (display_type == DISPLAY_HOSTESCALATIONS)	printf("主机升级");
+		else if (display_type == DISPLAY_HOSTESCALATIONS)	printf("主机增强");
 		else if (display_type == DISPLAY_MODULES)		printf("模块");
 		else if (display_type == DISPLAY_CGICONFIG)		printf("CGI配置设置");
 
@@ -3373,7 +3373,7 @@ void display_serviceescalations(void) {
 
 			options = 0;
 			if (temp_se->escalate_on_warning == TRUE) {
-				printf("%s报警%s", (content_type == JSON_CONTENT) ? "\"" : "", (content_type == JSON_CONTENT) ? "\"" : "");
+				printf("%s警报%s", (content_type == JSON_CONTENT) ? "\"" : "", (content_type == JSON_CONTENT) ? "\"" : "");
 				options = 1;
 			}
 			if (temp_se->escalate_on_unknown == TRUE) {
@@ -4416,6 +4416,7 @@ void display_options(void) {
 	printf("<option value='modules' %s>模块\n", (display_type == DISPLAY_MODULES) ? "SELECTED" : "");
 	printf("<option value='commands' %s>命令\n", (display_type == DISPLAY_COMMANDS) ? "SELECTED" : "");
 	printf("<option value='command' %s>命令扩展\n", (display_type == DISPLAY_COMMAND_EXPANSION) ? "SELECTED" : "");
+    printf("<option value='cgiconfig' %s>CGI配置\n", (display_type == DISPLAY_CGICONFIG) ? "SELECTED" : "");
 	printf("</select>\n");
 	printf("</td></tr>\n");
 
