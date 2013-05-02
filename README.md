@@ -7,3 +7,8 @@ ICINGA项目是由Michael Luebben、HendrikB?cker和JoergLinge等人发起的，
 中文化项目是由Icinga中文化项目组，基于icinga
 (http://www.icinga.com)
 基础上，并在此基础上针对中文需求进行优化及修改，同时集成nagiosgraph或pnp4nagios绘图，包括简体中文、繁体中文（计划）,界面以及生成的图像都已中文化。
+
+
+2013-04-28
+icinga-cn-1.8.4简体及繁体版发布
+icinga-cn-1.8.4整合全新的资源，重新校对了翻译内容，修复了出现的问题，增加了可选主题，字体支持样式更改为TTC！
