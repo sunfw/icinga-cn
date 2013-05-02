@@ -10,5 +10,6 @@ ICINGA项目是由Michael Luebben、HendrikB?cker和JoergLinge等人发起的，
 
 
 2013-04-28
+
 icinga-cn-1.8.4简体及繁体版发布
 icinga-cn-1.8.4整合全新的资源，重新校对了翻译内容，修复了出现的问题，增加了可选主题，字体支持样式更改为TTC！
