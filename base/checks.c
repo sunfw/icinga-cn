@@ -3,8 +3,8 @@
  * CHECKS.C - Service and host check functions for Icinga
  *
  * Copyright (c) 1999-2010 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Nagios Core Development Team and Community Contributors
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -435,7 +435,7 @@ int run_scheduled_service_check(service *svc, int check_options, double latency)
 			get_next_valid_time(preferred_time, &next_valid_time, svc->check_period_ptr);
 
 			/*
-			logit(NSLOG_RUNTIME_WARNING,TRUE,"警报: '%s'主机上的'%s'服务时间段检查失败...\n",svc->description,svc->host_name);
+			logit(NSLOG_RUNTIME_WARNING,TRUE,"警报: '%s' 主机上的 '%s' 服务时间段检查失败...\n",svc->host_name,svc->description);
 			logit(NSLOG_RUNTIME_WARNING,TRUE,"当前时间: %s",ctime(&current_time));
 			logit(NSLOG_RUNTIME_WARNING,TRUE,"首选时间: %s",ctime(&preferred_time));
 			logit(NSLOG_RUNTIME_WARNING,TRUE,"下一个有效时间: %s",ctime(&next_valid_time));
@@ -544,6 +544,12 @@ int run_async_service_check(service *svc, int check_options, double latency, int
 
 	/* send data to event broker */
 	neb_result = broker_service_check(NEBTYPE_SERVICECHECK_ASYNC_PRECHECK, NEBFLAG_NONE, NEBATTR_NONE, svc, SERVICE_CHECK_ACTIVE, start_time, end_time, svc->service_check_command, svc->latency, 0.0, 0, FALSE, 0, NULL, NULL);
+
+    if (neb_result == NEBERROR_CALLBACKCANCEL || neb_result == NEBERROR_CALLBACKOVERRIDE) {
+        log_debug_info(DEBUGL_CHECKS, 0, "Check of service '%s' on host '%s' was %s by a module\n",
+                svc->description, svc->host_name,
+                neb_result == NEBERROR_CALLBACKCANCEL ? "cancelled" : "overridden");
+    }
 
 	/* neb module wants to cancel the service check - the check will be rescheduled for a later time by the scheduling logic */
 	if (neb_result == NEBERROR_CALLBACKCANCEL) {
@@ -667,19 +673,19 @@ int run_async_service_check(service *svc, int check_options, double latency, int
 	if (check_result_info.output_file_fp) {
 
 		fprintf(check_result_info.output_file_fp, "### 主动检查结果文件 ###\n");
-		fprintf(check_result_info.output_file_fp, "文件时间=%lu\n", (unsigned long)check_result_info.start_time.tv_sec);
+		fprintf(check_result_info.output_file_fp, "file_time=%lu\n", (unsigned long)check_result_info.start_time.tv_sec);
 		fprintf(check_result_info.output_file_fp, "\n");
 
-		fprintf(check_result_info.output_file_fp, "### Icinga服务检查结果###\n");
+		fprintf(check_result_info.output_file_fp, "### Icinga 服务检查结果 ###\n");
 		fprintf(check_result_info.output_file_fp, "# 时间: %s", ctime(&check_result_info.start_time.tv_sec));
-		fprintf(check_result_info.output_file_fp, "主机名称=%s\n", check_result_info.host_name);
-		fprintf(check_result_info.output_file_fp, "服务描述=%s\n", check_result_info.service_description);
-		fprintf(check_result_info.output_file_fp, "检查类型=%d\n", check_result_info.check_type);
-		fprintf(check_result_info.output_file_fp, "检查选项=%d\n", check_result_info.check_options);
-		fprintf(check_result_info.output_file_fp, "安排检查=%d\n", check_result_info.scheduled_check);
-		fprintf(check_result_info.output_file_fp, "重新安排检查=%d\n", check_result_info.reschedule_check);
-		fprintf(check_result_info.output_file_fp, "延迟=%f\n", svc->latency);
-		fprintf(check_result_info.output_file_fp, "开始时间=%lu.%lu\n", check_result_info.start_time.tv_sec, check_result_info.start_time.tv_usec);
+		fprintf(check_result_info.output_file_fp, "host_name=%s\n", check_result_info.host_name);
+		fprintf(check_result_info.output_file_fp, "service_description=%s\n", check_result_info.service_description);
+		fprintf(check_result_info.output_file_fp, "check_type=%d\n", check_result_info.check_type);
+		fprintf(check_result_info.output_file_fp, "check_options=%d\n", check_result_info.check_options);
+		fprintf(check_result_info.output_file_fp, "scheduled_check=%d\n", check_result_info.scheduled_check);
+		fprintf(check_result_info.output_file_fp, "reschedule_check=%d\n", check_result_info.reschedule_check);
+		fprintf(check_result_info.output_file_fp, "latency=%f\n", svc->latency);
+		fprintf(check_result_info.output_file_fp, "start_time=%lu.%lu\n", check_result_info.start_time.tv_sec, check_result_info.start_time.tv_usec);
 
 		/* flush output or it'll get written again when we fork() */
 		fflush(check_result_info.output_file_fp);
@@ -1150,7 +1156,7 @@ int handle_async_service_check_result(service *temp_service, check_result *queue
 
 		logit(NSLOG_RUNTIME_WARNING, TRUE, "警报:  Check of service '%s' on host '%s' did not exit properly!\n", temp_service->description, temp_service->host_name);
 
-		temp_service->plugin_output = (char *)strdup("(Service check did not exit properly)");
+		temp_service->plugin_output = (char *)strdup("(服务检查没有正常退出)");
 
 		temp_service->current_state = STATE_CRITICAL;
 	}
@@ -2143,9 +2149,12 @@ void check_for_orphaned_services(void) {
 		if (expected_time < current_time) {
 
 			/* log a warning */
-			logit(NSLOG_RUNTIME_WARNING, TRUE, "警报: The check of service '%s' on host '%s' looks like it was orphaned (results never came back).  I'm scheduling an immediate check of the service...\n", temp_service->description, temp_service->host_name);
+			logit(NSLOG_RUNTIME_WARNING, TRUE, "Warning: The check of service '%s' on host '%s' looks like it was orphaned (results never came back; last_check=%s; next_check=%s).  I'm scheduling an immediate check of the service...\n", temp_service->description, temp_service->host_name, ctime(&temp_service->last_check), ctime(&temp_service->next_check));
 
 			log_debug_info(DEBUGL_CHECKS, 1, "Service '%s' on host '%s' was orphaned, so we're scheduling an immediate check...\n", temp_service->description, temp_service->host_name);
+            log_debug_info(DEBUGL_CHECKS, 1, "  next_check=%lu (%s); last_check=%lu (%s);\n",
+                    temp_service->next_check, ctime(&temp_service->next_check),
+                    temp_service->last_check, ctime(&temp_service->last_check));
 
 			/* decrement the number of running service checks */
 			if (currently_running_service_checks > 0)
@@ -2172,11 +2181,11 @@ void check_service_result_freshness(void) {
 
 
 	log_debug_info(DEBUGL_FUNCTIONS, 0, "check_service_result_freshness()\n");
-	log_debug_info(DEBUGL_CHECKS, 1, "Checking the freshness of service check results...\n");
+	log_debug_info(DEBUGL_CHECKS, 1, "检查服务检查结果的最新...\n");
 
 	/* bail out if we're not supposed to be checking freshness */
 	if (check_service_freshness == FALSE) {
-		log_debug_info(DEBUGL_CHECKS, 1, "Service freshness checking is disabled.\n");
+		log_debug_info(DEBUGL_CHECKS, 1, "禁用服务的最新检查.\n");
 		return;
 	}
 
@@ -2556,7 +2565,7 @@ void check_for_orphaned_hosts(void) {
 			/* log a warning */
 			logit(NSLOG_RUNTIME_WARNING, TRUE, "警报: The check of host '%s' looks like it was orphaned (results never came back).  I'm scheduling an immediate check of the host...\n", temp_host->name);
 
-			log_debug_info(DEBUGL_CHECKS, 1, "Host '%s' was orphaned, so we're scheduling an immediate check...\n", temp_host->name);
+			log_debug_info(DEBUGL_CHECKS, 1, "主机 '%s' 已孤立, 因此我们会立即安排检查...\n", temp_host->name);
 
 			/* decrement the number of running host checks */
 			if (currently_running_host_checks > 0)
@@ -2893,14 +2902,20 @@ int execute_sync_host_check_3x(host *hst) {
 	/* send data to event broker */
 	neb_result = broker_host_check(NEBTYPE_HOSTCHECK_SYNC_PRECHECK, NEBFLAG_NONE, NEBATTR_NONE, hst, HOST_CHECK_ACTIVE, hst->current_state, hst->state_type, start_time, end_time, hst->host_check_command, hst->latency, 0.0, host_check_timeout, FALSE, 0, NULL, NULL, NULL, NULL, NULL);
 
-	/* neb module wants to cancel the host check - return the current state of the host */
-	if (neb_result == NEBERROR_CALLBACKCANCEL)
+	/*
+     * neb module wants to cancel/override the host check
+     * then return the current state of the host
+     * NOTE: if a module does this, it must check the status of the host
+     * and populate the data structures BEFORE it returns from the callback!
+     */
+	if (neb_result == NEBERROR_CALLBACKCANCEL || neb_result == NEBERROR_CALLBACKOVERRIDE) {
+        log_debug_info(DEBUGL_CHECKS, 0, "Check of host '%s' was %s by a module. Returning %d\n",
+                hst->name,
+                neb_result == NEBERROR_CALLBACKCANCEL ? "cancelled" : "overridden",
+                hst->current_state);
 		return hst->current_state;
+    }
 
-	/* neb module wants to override the host check - perhaps it will check the host itself */
-	/* NOTE: if a module does this, it must check the status of the host and populate the data structures BEFORE it returns from the callback! */
-	if (neb_result == NEBERROR_CALLBACKOVERRIDE)
-		return hst->current_state;
 #endif
 
 	/* grab the host macros */
@@ -3208,11 +3223,6 @@ int run_async_host_check_3x(host *hst, int check_options, double latency, int sc
 	/* get the command start time */
 	gettimeofday(&start_time, NULL);
 
-	/* set check time for on-demand checks, so they're not incorrectly detected as being orphaned - Luke Ross 5/16/08 */
-	/* NOTE: 06/23/08 EG not sure if there will be side effects to this or not.... */
-	if (scheduled_check == FALSE)
-		hst->next_check = start_time.tv_sec;
-
 	/* increment number of host checks that are currently running... */
 	currently_running_host_checks++;
 
@@ -3301,7 +3311,7 @@ int run_async_host_check_3x(host *hst, int check_options, double latency, int sc
 		/* log an error */
 		logit(NSLOG_RUNTIME_WARNING, TRUE, "警报: The check of host '%s' could not be performed due to a fork() error: '%s'.\n", hst->name, strerror(errno));
 
-		log_debug_info(DEBUGL_CHECKS, 0, "Check of host '%s' could not be performed due to a fork() error: '%s'!\n", hst->name, strerror(errno));
+		log_debug_info(DEBUGL_CHECKS, 0, "由于fork()错误, '%s' 主机检查不能执行: '%s'!\n", hst->name, strerror(errno));
 	}
 
 	/* if we are in the child process... */
@@ -3832,7 +3842,7 @@ int process_host_check_result_3x(host *hst, int new_state, char *old_plugin_outp
 		/***** HOST IS NOW DOWN/UNREACHABLE *****/
 		else {
 
-			log_debug_info(DEBUGL_CHECKS, 1, "Host is now DOWN/UNREACHABLE.\n");
+			log_debug_info(DEBUGL_CHECKS, 1, "主机宕机/不可达.\n");
 
 			/***** SPECIAL CASE FOR HOSTS WITH MAX_ATTEMPTS==1 *****/
 			if (hst->max_attempts == 1) {

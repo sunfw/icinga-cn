@@ -3,8 +3,8 @@
  * DOWNTIME.C - Scheduled downtime functions for Icinga
  *
  * Copyright (c) 2000-2008 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Nagios Core Development Team and Community Contributors
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -47,6 +47,15 @@
 
 
 scheduled_downtime *scheduled_downtime_list = NULL;
+/*
+ * downtimes are not sorted by id, but starttime
+ * this leads into https://dev.icinga.org/issues/2688
+ * where child downtimes are considered invalid when
+ * looking up the parent
+ * setting this to 1 could cause unresolvable issues.
+ * the fix for child downtimes can be found in 
+ * downtime_compar()
+ */
 int		   defer_downtime_sorting = 0;
 
 #ifdef NSCORE
@@ -155,6 +164,8 @@ int unschedule_downtime(int type, unsigned long downtime_id) {
 		else
 			svc->pending_flex_downtime--;
 	}
+
+    log_debug_info(DEBUGL_DOWNTIME, 0, "取消 %s 宕机 (id=%lu)\n", temp_downtime->type == HOST_DOWNTIME ? "host" : "service", temp_downtime->downtime_id);
 
 	/* decrement the downtime depth variable and update status data if necessary */
 	if (temp_downtime->is_in_effect == TRUE) {
@@ -276,9 +287,9 @@ int register_downtime(int type, unsigned long downtime_id) {
 	else
 		type_string = "service";
 	if (temp_downtime->fixed == TRUE)
-		dummy = asprintf(&temp_buffer, "This %s has been scheduled for fixed downtime from %s to %s.  Notifications for the %s will not be sent out during that time period.", type_string, start_time_string, end_time_string, type_string);
+		dummy = asprintf(&temp_buffer, "安排%s固定宕机时间从%s到%s.  在这段时间内将不会发送%s通知.", type_string, start_time_string, end_time_string, type_string);
 	else
-		dummy = asprintf(&temp_buffer, "This %s has been scheduled for flexible downtime starting between %s and %s and lasting for a period of %d hours and %d minutes.  Notifications for the %s will not be sent out during that time period.", type_string, start_time_string, end_time_string, hours, minutes, type_string);
+		dummy = asprintf(&temp_buffer, "安排%s可变宕机时间从%s和%s之间开始/持续%d小时和%d分钟周期.  在这段时间内将不会发送%s通知.", type_string, start_time_string, end_time_string, hours, minutes, type_string);
 
 
 	log_debug_info(DEBUGL_DOWNTIME, 0, "安排宕机详情:\n");
@@ -504,7 +515,7 @@ int handle_scheduled_downtime(scheduled_downtime *temp_downtime) {
 				/* set the trigger time, needed to detect the end of a flexible downtime */
 				temp_downtime->trigger_time = current_time;
 
-				log_debug_info(DEBUGL_DOWNTIME, 0, "Host '%s' has entered a period of scheduled downtime (id=%lu) at triggertime=%lu.\n", hst->name, temp_downtime->downtime_id, temp_downtime->trigger_time);
+				log_debug_info(DEBUGL_DOWNTIME, 0, "在(triggertime=%lu)时主机'%s'已进入安排宕机周期(id=%lu).\n", temp_downtime->trigger_time, hst->name, temp_downtime->downtime_id);
 
 				/* log a notice - this one is parsed by the history CGI */
 				logit(NSLOG_INFO_MESSAGE, FALSE, "主机宕机警告: %s;开始; 主机已进入安排宕机时段", hst->name);
@@ -518,10 +529,10 @@ int handle_scheduled_downtime(scheduled_downtime *temp_downtime) {
 				/* set the trigger time, needed to detect the end of a flexible downtime */
 				temp_downtime->trigger_time = current_time;
 
-				log_debug_info(DEBUGL_DOWNTIME, 0, "Service '%s' on host '%s' has entered a period of scheduled downtime (id=%lu) at triggertime=%lu.\n", svc->description, svc->host_name, temp_downtime->downtime_id, temp_downtime->trigger_time);
+				log_debug_info(DEBUGL_DOWNTIME, 0, "在(triggertime=%lu)时主机'%s'上的服务'%s'已进入安排宕机周期(id=%lu).\n", temp_downtime->trigger_time, svc->host_name, svc->description, temp_downtime->downtime_id);
 
 				/* log a notice - this one is parsed by the history CGI */
-				logit(NSLOG_INFO_MESSAGE, FALSE, "服务宕机警告: %s;%s;开始; 服务已进入安排宕机时段", svc->host_name, svc->description);
+				logit(NSLOG_INFO_MESSAGE, FALSE, "服务宕机警告: %s;%s;开始; 服务已进入安排宕机周期", svc->host_name, svc->description);
 
 				/* send a notification */
 				service_notification(svc, NOTIFICATION_DOWNTIMESTART, temp_downtime->author, temp_downtime->comment, NOTIFICATION_OPTION_NONE);
@@ -609,7 +620,7 @@ int check_pending_flex_host_downtime(host *hst) {
 			/* if the time boundaries are okay, start this scheduled downtime */
 			if (temp_downtime->start_time <= current_time && current_time <= temp_downtime->end_time) {
 
-				log_debug_info(DEBUGL_DOWNTIME, 0, "Flexible downtime (id=%lu) for host '%s' starting now...\n", temp_downtime->downtime_id, hst->name);
+				log_debug_info(DEBUGL_DOWNTIME, 0, "从现在开始主机'%s'的可变宕机(id=%lu)...\n", hst->name, temp_downtime->downtime_id);
 
 				temp_downtime->start_flex_downtime = TRUE;
 				handle_scheduled_downtime(temp_downtime);
@@ -660,7 +671,7 @@ int check_pending_flex_service_downtime(service *svc) {
 			/* if the time boundaries are okay, start this scheduled downtime */
 			if (temp_downtime->start_time <= current_time && current_time <= temp_downtime->end_time) {
 
-				log_debug_info(DEBUGL_DOWNTIME, 0, "Flexible downtime (id=%lu) for service '%s' on host '%s' starting now...\n", temp_downtime->downtime_id, svc->description, svc->host_name);
+				log_debug_info(DEBUGL_DOWNTIME, 0, "从现在开始在主机'%s'上的服务'%s'可变宕机(id=%lu) ...\n", svc->host_name, svc->description, temp_downtime->downtime_id);
 
 				temp_downtime->start_flex_downtime = TRUE;
 				handle_scheduled_downtime(temp_downtime);
@@ -691,7 +702,7 @@ int check_for_expired_downtime(void) {
 		/* this entry should be removed */
 		if (temp_downtime->is_in_effect == FALSE && temp_downtime->end_time < current_time) {
 
-			log_debug_info(DEBUGL_DOWNTIME, 0, "Expiring %s downtime (id=%lu)...\n", (temp_downtime->type == HOST_DOWNTIME) ? "host" : "service", temp_downtime->downtime_id);
+			log_debug_info(DEBUGL_DOWNTIME, 0, "逾期 %s 宕机 (id=%lu)...\n", (temp_downtime->type == HOST_DOWNTIME) ? "host" : "service", temp_downtime->downtime_id);
 
 			/* delete the downtime entry */
 			if (temp_downtime->type == HOST_DOWNTIME)
@@ -1065,7 +1076,17 @@ int add_downtime(int downtime_type, char *host_name, char *svc_description, time
 static int downtime_compar(const void *p1, const void *p2) {
 	scheduled_downtime *d1 = *(scheduled_downtime **)p1;
 	scheduled_downtime *d2 = *(scheduled_downtime **)p2;
+
+	/* if the valid parent is read from status/retention.dat
+	 * after the child downtime, this comparison is considered
+	 * invalid then.
+	 * the fix assumes that:
+	 * - parent and child downtimes have the same start time
+	 * - downtime_id is ascending, and parent/trigger id before child id
+	 *
 	return (d1->start_time < d2->start_time) ? -1 : (d1->start_time - d2->start_time);
+	 */
+	return (d1->start_time == d2->start_time) ? (d1->downtime_id - d2->downtime_id) : (d1->start_time - d2->start_time);
 }
 
 int sort_downtime(void) {

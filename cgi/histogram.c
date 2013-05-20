@@ -3,7 +3,7 @@
  * HISTOGRAM.C -  Icinga Alert Histogram CGI
  *
  * Copyright (c) 1999-2009 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -234,9 +234,9 @@ int main(int argc, char **argv) {
 	/* read the CGI configuration file */
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+			print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 			document_footer(CGI_ID);
 		}
 		return ERROR;
@@ -245,9 +245,9 @@ int main(int argc, char **argv) {
 	/* read the main configuration file */
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+			print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 			document_footer(CGI_ID);
 		}
 		return ERROR;
@@ -256,20 +256,20 @@ int main(int argc, char **argv) {
 	/* read all object configuration data */
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(NULL, ERROR_CGI_OBJECT_DATA);
+			print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 			document_footer(CGI_ID);
 		}
 		return ERROR;
 	}
 
 	/* read all status data */
-	result = read_all_status_data(get_cgi_config_location(), READ_ALL_STATUS_DATA);
+	result = read_all_status_data(main_config_file, READ_ALL_STATUS_DATA);
 	if (result == ERROR && daemon_check == TRUE) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(NULL, ERROR_CGI_STATUS_DATA);
+			print_error(NULL, ERROR_CGI_STATUS_DATA, FALSE);
 			document_footer(CGI_ID);
 		}
 		free_memory();
@@ -482,11 +482,11 @@ int main(int argc, char **argv) {
 	/* check authorization... */
 	if (display_type == DISPLAY_HOST_HISTOGRAM) {
 		temp_host = find_host(host_name);
-		if (temp_host == NULL || is_authorized_for_host(temp_host, &current_authdata) == FALSE)
+		if (is_authorized_for_host(temp_host, &current_authdata) == FALSE)
 			is_authorized = FALSE;
 	} else if (display_type == DISPLAY_SERVICE_HISTOGRAM) {
 		temp_service = find_service(host_name, service_desc);
-		if (temp_service == NULL || is_authorized_for_service(temp_service, &current_authdata) == FALSE)
+		if (is_authorized_for_service(temp_service, &current_authdata) == FALSE)
 			is_authorized = FALSE;
 	}
 	if (is_authorized == FALSE) {
@@ -686,7 +686,7 @@ int main(int argc, char **argv) {
 			for (temp_service = service_list; temp_service != NULL; temp_service = temp_service->next) {
 				if (is_authorized_for_service(temp_service, &current_authdata) == TRUE)
 					temp_host = find_host(temp_service->host_name);
-				printf("<option value='%s^%s'>%s;%s\n", escape_string(temp_service->host_name), escape_string(temp_service->description), (temp_host->display_name != NULL) ? temp_host->display_name : temp_host->name, (temp_service->display_name != NULL) ? temp_service->display_name : temp_service->description);
+				printf("<option value='%s^%s'>%s;%s\n", escape_string(temp_service->host_name), escape_string(temp_service->description), (temp_host != NULL && temp_host->display_name != NULL) ? temp_host->display_name : temp_service->host_name, (temp_service->display_name != NULL) ? temp_service->display_name : temp_service->description);
 			}
 
 			printf("</select>\n");

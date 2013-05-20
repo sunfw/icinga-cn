@@ -3,7 +3,7 @@
  * SUMMARY.C -  Icinga Alert Summary CGI
  *
  * Copyright (c) 2002-2008 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+		print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -212,7 +212,7 @@ int main(int argc, char **argv) {
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_OBJECT_DATA);
+		print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -359,7 +359,7 @@ int main(int argc, char **argv) {
 				x = 1;
 			}
 			if (service_states & AE_SERVICE_CRITICAL)
-				printf("%s紧急", (x == 1) ? ", " : "");
+				printf("%s严重", (x == 1) ? ", " : "");
 			if (x == 0)
 				printf("无");
 			printf("</td>\n");
@@ -590,7 +590,7 @@ int main(int argc, char **argv) {
 		printf("<option value=%d>服务正常状态\n", AE_SERVICE_OK);
 		printf("<option value=%d>服务警报状态\n", AE_SERVICE_WARNING);
 		printf("<option value=%d>服务未知状态\n", AE_SERVICE_UNKNOWN);
-		printf("<option value=%d>服务紧急状态\n", AE_SERVICE_CRITICAL);
+		printf("<option value=%d>服务严重状态\n", AE_SERVICE_CRITICAL);
 		printf("</select>\n");
 		printf("</td></tr>\n");
 
@@ -1539,9 +1539,9 @@ void display_report(void) {
 			printf("%s服务未知软件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 			printf("%s服务未知硬件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 			printf("%s服务未知总计%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
-			printf("%s服务紧急软件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
-			printf("%s服务紧急硬件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
-			printf("%s服务紧急总计%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
+			printf("%s服务严重软件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
+			printf("%s服务严重硬件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
+			printf("%s服务严重总计%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 			printf("%s服务所有软件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 			printf("%s服务所有硬件状态%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 			printf("%s服务所有总计%s\n", csv_data_enclosure, csv_data_enclosure);
@@ -1683,10 +1683,12 @@ void display_recent_alerts(void) {
 			odd = 1;
 
 		/* find the host */
-		temp_host = find_host(temp_event->host_name);
+		if ((temp_host = find_host(temp_event->host_name)) == NULL)
+			continue;
 
 		/* find the service */
-		temp_service = find_service(temp_event->host_name, temp_event->service_description);
+		if ((temp_service = find_service(temp_event->host_name, temp_event->service_description)) == NULL)
+			continue;
 
 		get_time_string(&temp_event->time_stamp, date_time, (int)sizeof(date_time), SHORT_DATE_TIME);
 
@@ -1756,7 +1758,7 @@ void display_recent_alerts(void) {
 			break;
 		case AE_SERVICE_CRITICAL:
 			status_bgclass = "serviceCRITICAL";
-			status = "紧急";
+			status = "严重";
 			break;
 		default:
 			status_bgclass = (odd) ? "Even" : "Odd";
@@ -1775,7 +1777,7 @@ void display_recent_alerts(void) {
 		} else {
 			printf("<td CLASS='%s'>%s</td>", status_bgclass, status);
 
-			printf("<td CLASS='data%s'>%s</td>", (odd) ? "Even" : "Odd", (temp_event->state_type == AE_SOFT_STATE) ? "软件状态" : "硬件状态");
+			printf("<td CLASS='data%s'>%s</td>", (odd) ? "Even" : "Odd", (temp_event->state_type == AE_SOFT_STATE) ? "SOFT" : "HARD");
 
 			printf("<td CLASS='data%s'>%s</td>", (odd) ? "Even" : "Odd", temp_event->event_info);
 
@@ -2267,9 +2269,9 @@ void display_alerts(void) {
 			printf("\"服务未知软件状态\": %d, ", soft_service_unknown_alerts);
 			printf("\"务未知硬件状态\": %d, ", hard_service_unknown_alerts);
 			printf("\"服务未知总计\": %d, ", soft_service_unknown_alerts + hard_service_unknown_alerts);
-			printf("\"服务紧急软件状态\": %d, ", soft_service_critical_alerts);
-			printf("\"服务紧急硬件状态\": %d, ", hard_service_critical_alerts);
-			printf("\"服务紧急总计\": %d, ", soft_service_critical_alerts + hard_service_critical_alerts);
+			printf("\"服务严重软件状态\": %d, ", soft_service_critical_alerts);
+			printf("\"服务严重硬件状态\": %d, ", hard_service_critical_alerts);
+			printf("\"服务严重总计\": %d, ", soft_service_critical_alerts + hard_service_critical_alerts);
 			printf("\"服务所有软件状态\": %d, ", soft_service_ok_alerts + soft_service_warning_alerts + soft_service_unknown_alerts + soft_service_critical_alerts);
 			printf("\"服务所有硬件状态\": %d, ", hard_service_ok_alerts + hard_service_warning_alerts + hard_service_unknown_alerts + hard_service_critical_alerts);
 			printf("\"服务所有总计\": %d}", soft_service_ok_alerts + soft_service_warning_alerts + soft_service_unknown_alerts + soft_service_critical_alerts + hard_service_ok_alerts + hard_service_warning_alerts + hard_service_unknown_alerts + hard_service_critical_alerts);
@@ -2382,7 +2384,7 @@ void display_alerts(void) {
 			printf("<TR CLASS='dataOdd'><TD CLASS='serviceOK'>正常</TD><TD CLASS='dataOdd'>%d</TD><TD CLASS='dataOdd'>%d</TD><TD CLASS='dataOdd'>%d</TD></TR>\n", soft_service_ok_alerts, hard_service_ok_alerts, soft_service_ok_alerts + hard_service_ok_alerts);
 			printf("<TR CLASS='dataEven'><TD CLASS='serviceWARNING'>警报</TD><TD CLASS='dataEven'>%d</TD><TD CLASS='dataEven'>%d</TD><TD CLASS='dataEven'>%d</TD></TR>\n", soft_service_warning_alerts, hard_service_warning_alerts, soft_service_warning_alerts + hard_service_warning_alerts);
 			printf("<TR CLASS='dataOdd'><TD CLASS='serviceUNKNOWN'>未知</TD><TD CLASS='dataOdd'>%d</TD><TD CLASS='dataOdd'>%d</TD><TD CLASS='dataOdd'>%d</TD></TR>\n", soft_service_unknown_alerts, hard_service_unknown_alerts, soft_service_unknown_alerts + hard_service_unknown_alerts);
-			printf("<TR CLASS='dataEven'><TD CLASS='serviceCRITICAL'>紧急</TD><TD CLASS='dataEven'>%d</TD><TD CLASS='dataEven'>%d</TD><TD CLASS='dataEven'>%d</TD></TR>\n", soft_service_critical_alerts, hard_service_critical_alerts, soft_service_critical_alerts + hard_service_critical_alerts);
+			printf("<TR CLASS='dataEven'><TD CLASS='serviceCRITICAL'>严重</TD><TD CLASS='dataEven'>%d</TD><TD CLASS='dataEven'>%d</TD><TD CLASS='dataEven'>%d</TD></TR>\n", soft_service_critical_alerts, hard_service_critical_alerts, soft_service_critical_alerts + hard_service_critical_alerts);
 			printf("<TR CLASS='dataOdd'><TD CLASS='dataOdd'>所有状态</TD><TD CLASS='dataOdd'>%d</TD><TD CLASS='dataOdd'>%d</TD><TD CLASS='dataOdd'><B>%d</B></TD></TR>\n", soft_service_ok_alerts + soft_service_warning_alerts + soft_service_unknown_alerts + soft_service_critical_alerts, hard_service_ok_alerts + hard_service_warning_alerts + hard_service_unknown_alerts + hard_service_critical_alerts, soft_service_ok_alerts + soft_service_warning_alerts + soft_service_unknown_alerts + soft_service_critical_alerts + hard_service_ok_alerts + hard_service_warning_alerts + hard_service_unknown_alerts + hard_service_critical_alerts);
 
 			printf("</TABLE>\n");

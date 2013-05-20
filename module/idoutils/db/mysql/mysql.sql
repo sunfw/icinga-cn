@@ -2,7 +2,7 @@
 -- mysql.sql
 -- DB definition for MySQL
 --
--- Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+-- Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
 --
 -- -- --------------------------------------------------------
 
@@ -630,7 +630,7 @@ CREATE TABLE IF NOT EXISTS icinga_hosts (
   config_type smallint default 0,
   host_object_id bigint unsigned default 0,
   alias varchar(64) character set utf8  default '',
-  display_name varchar(255) character set utf8 collate utf8_general_cs  default '',
+  display_name varchar(255) character set utf8 collate utf8_general_ci  default '',
   address varchar(128) character set utf8  default '',
   address6 varchar(128) character set utf8  default '',
   check_command_object_id bigint unsigned default 0,
@@ -856,8 +856,8 @@ CREATE TABLE IF NOT EXISTS icinga_objects (
   object_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   instance_id bigint unsigned default 0,
   objecttype_id bigint unsigned default 0,
-  name1 varchar(128) character set utf8 collate utf8_general_cs  default '',
-  name2 varchar(128) character set utf8 collate utf8_general_cs default NULL,
+  name1 varchar(128) character set utf8 collate utf8_general_ci  default '',
+  name2 varchar(128) character set utf8 collate utf8_general_ci default NULL,
   is_active smallint default 0,
   PRIMARY KEY  (object_id),
   KEY objecttype_id (objecttype_id,name1,name2)
@@ -1113,7 +1113,7 @@ CREATE TABLE IF NOT EXISTS icinga_services (
   config_type smallint default 0,
   host_object_id bigint unsigned default 0,
   service_object_id bigint unsigned default 0,
-  display_name varchar(255) character set utf8 collate utf8_general_cs  default '',
+  display_name varchar(255) character set utf8 collate utf8_general_ci  default '',
   check_command_object_id bigint unsigned default 0,
   check_command_args TEXT character set utf8  default '',
   eventhandler_command_object_id bigint unsigned default 0,
@@ -1597,9 +1597,14 @@ CREATE INDEX sgmbrs_sgid_soid ON icinga_servicegroup_members (servicegroup_id,se
 CREATE INDEX scgrps_sid_cgoid ON icinga_service_contactgroups (service_id,contactgroup_object_id);
 CREATE INDEX tperiod_tid_d_ss_es ON icinga_timeperiod_timeranges (timeperiod_id,day,start_sec,end_sec);
 
+-- #3649
+CREATE INDEX sla_idx_sthist ON icinga_statehistory (object_id, state_time DESC);
+CREATE INDEX sla_idx_dohist ON icinga_downtimehistory (object_id, actual_start_time, actual_end_time);
+CREATE INDEX sla_idx_obj ON icinga_objects (objecttype_id, is_active, name1);
+
 -- -----------------------------------------
 -- set dbversion
 -- -----------------------------------------
-INSERT INTO icinga_dbversion (name, version, create_time, modify_time) VALUES ('idoutils', '1.8.0', NOW(), NOW()) ON DUPLICATE KEY UPDATE version='1.8.0', modify_time=NOW();
+INSERT INTO icinga_dbversion (name, version, create_time, modify_time) VALUES ('idoutils', '1.9.0', NOW(), NOW()) ON DUPLICATE KEY UPDATE version='1.9.0', modify_time=NOW();
 
 

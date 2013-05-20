@@ -59,6 +59,7 @@ install:
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/jquery-ui/theme/ui-hot-sneaks
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/jquery-ui/theme/ui-hot-sneaks/images
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/jquery-ui/localization
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/jquery-ui-addon
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/js
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/ssi
 	$(INSTALL) -m 444 $(INSTALL_OPTS) log/.htaccess $(DESTDIR)$(CGILOGDIR)
@@ -97,8 +98,6 @@ install:
 	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/images/logos; done
 	for file in jquery-ui/*.js; \
 	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/jquery-ui; done
-	for file in jquery-ui/*.css; \
-	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/jquery-ui; done
 	for file in jquery-ui/theme/ui-smoothness/images/*.*; \
 	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/jquery-ui/theme/ui-smoothness/images; done
 	for file in jquery-ui/theme/ui-smoothness/*.css; \
@@ -117,9 +116,11 @@ install:
 	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/jquery-ui/theme/ui-hot-sneaks; done
 	for file in jquery-ui/localization/*.*; \
 	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/jquery-ui/localization; done
+	for file in jquery-ui-addon/*.*; \
+	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/jquery-ui-addon; done
 	for file in js/*.js; \
 	do $(INSTALL) -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(HTMLDIR)/js; done
-    
+
 install-dev-docu:
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/doxygen
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(HTMLDIR)/doxygen/html

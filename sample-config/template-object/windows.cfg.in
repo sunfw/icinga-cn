@@ -21,12 +21,12 @@
 # Change the host_name, alias, and address to fit your situation
 
 define host{
-	use		windows-server	; Inherit default values from a template
-	host_name	winserver	; The name we're giving to this host
-	alias		My Windows Server	; A longer name associated with the host
+	use						windows-server	; Inherit default values from a template
+	host_name				winserver	; The name we're giving to this host
+	alias					My Windows Server	; A longer name associated with the host
 	icon_image              win40.gif
     statusmap_image         win40.gd2
-	address		192.168.1.2	; IP address of the host
+	address					192.168.1.2	; IP address of the host
 	}
 
 
@@ -252,33 +252,23 @@ define service{
 	}
 	
 	
-# Create a service for exchange_mailrq
-# Change the host_name to match the name of the host you defined above
-
-define service{
-	use			generic-service
-	host_name		winserver
-	service_description	Exchange_Mailrq
-	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS Mailbox(_Total)\\Receive Queue Size","Receive Queue Size is %.f " -w 50 -c 100
-	}
-	
 # Create a service for exchange_mailsq
 # Change the host_name to match the name of the host you defined above
 
-define service{
-	use			generic-service
-	host_name		winserver
-	service_description	Exchange_Mailsq
-	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS Mailbox(_Total)\\Send Queue Size","Send Queue Size is %.f " -w 50 -c 100
-	}
+#define service{
+#	use			generic-service
+#	host_name		winserver
+#	service_description	Exchange_Mailsq
+#	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS Mailbox(_Total)\\Send Queue Size","Send Queue Size is %.f " -w 50 -c 100
+#	}
 	
 	
 # Create a service for MSExchangeIS
 # Change the host_name to match the name of the host you defined above
 
-define service{
-	use			generic-service
-	host_name		winserver
-	service_description	MSExchangeIS
-	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS\RPC Operations/sec","RPC: %.f" -w 300  -c 400
-	}
+#define service{
+#	use			generic-service
+#	host_name		winserver
+#	service_description	MSExchangeIS
+#	check_command		check_nt!COUNTER!-d SHOWALL -l "\\MSExchangeIS\RPC Operations/sec","RPC: %.f" -w 300  -c 400
+#	}

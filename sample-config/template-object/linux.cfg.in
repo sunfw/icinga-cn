@@ -81,8 +81,8 @@ define service{
         hostgroup_name                  linux-servers                        ; hostgroup for Linux machines
         use                             generic-service         ; Name of service template to use
         service_description             PING
-        servicegroups                  Linux-Ping 
-	    check_command			check_ping!100.0,20%!500.0,60%
+        servicegroups                   Linux-Ping 
+	check_command					check_ping!100.0,20%!500.0,60%
         }
 
 
@@ -90,12 +90,12 @@ define service{
 # on the local machine.  Warning if < 20% free, critical if
 # < 10% free space on partition.
 
-define service{
-        hostgroup_name                  linux-servers                        
-        use                             generic-service
-        service_description             Root Partition
-	    check_command			        check_nrpe!check_root
-        }
+#define service{
+#        hostgroup_name                  linux-servers                        
+#        use                             generic-service
+#        service_description             Root Partition
+#	 check_command			 check_nrpe!check_root
+#        }
 
 
 
@@ -107,7 +107,7 @@ define service{
         hostgroup_name                  linux-servers
         use                             generic-service
         service_description             Current Users
-	    check_command			       check_nrpe!check_users -w 20 -c 50
+	check_command			check_nrpe!check_users
         }
 
 
@@ -118,8 +118,8 @@ define service{
 define service{
         hostgroup_name                  linux-servers
         use                             generic-service
-		service_description             Total Processes
-	    check_command			        check_nrpe!check_procs
+	service_description             Total Processes
+	check_command			check_nrpe!check_procs
         }
 
 
@@ -130,7 +130,7 @@ define service{
         hostgroup_name                  linux-servers
         use                             generic-service
         service_description             Current Load
-	    check_command                   check_nrpe!check_load
+	check_command                   check_nrpe!check_load
         }
 
 
@@ -142,7 +142,7 @@ define service{
         hostgroup_name                  linux-servers
         use                             generic-service
         service_description             Swap Usage
-	    check_command			        check_nrpe!check_swap
+	check_command			check_nrpe!check_swap
         }
 
 
@@ -155,7 +155,7 @@ define service{
         use                             generic-service
         service_description             SSH
         servicegroups                   Linux-Ssh
-	   check_command			        check_nrpe!check_by_ssh
+	check_command			check_nrpe!check_ssh
         }
 
 
@@ -166,49 +166,34 @@ define service{
 define service{
         hostgroup_name                  linux-servers
         use                             generic-service
-		service_description             HTTP
-	    check_command			        check_nrpe!check_http
-	    notifications_enabled		0
+	service_description             HTTP
+	check_command			check_nrpe!check_http
+	notifications_enabled		0
         }
 
 # disk I/O Warning if >100 and critical if > 200
-define service{
-        host_name                      linuxhost    
-        use                            generic-service 
-        service_description            check_iostat
-	    check_command			       check_nrpe!check_iostat　-w 100 -c 200
-        }
+#define service{
+#        host_name                      linuxhost    
+#        use                            generic-service 
+#        service_description            check_iostat
+#	 check_command			check_nrpe!check_iostat
+#        }
         
 # Define a service to check cluster on the local machine.
 # Disable notifications for this service by default.
-define service{
-        host_name                      linuxhost       
-        use                            generic-service 
-        service_description            check_cluster
-	    check_command			       check_nrpe!check_cluster
-        }  
+#define service{
+#        host_name                      linuxhost       
+#        use                            generic-service 
+#        service_description            check_cluster
+#	  check_command			check_nrpe!check_cluster
+#        }  
         
         
 # Define a service to check log on the local machine. 
-define service{
-        hostgroup_name                  linux-servers
-        use                             generic-service
-        service_description             check_log
-	    check_command                   check_nrpe!check_log
-	    }
+#define service{
+#        hostgroup_name                  linux-servers
+#        use                             generic-service
+#        service_description             check_log
+#	 check_command                   check_nrpe!check_log
+#	    }
 	    
-# Define a service to check sensors on the local machine. 
-define service{
-        hostgroup_name                  linux-servers
-        use                             generic-service        
-        service_description             check_sensors
-	    check_command                   check_nrpe!check_sensors -w 50 -c 80
-	    }
-	    
-# Define a service to check log on the local machine. 
-define service{
-        hostgroup_name                  linux-servers
-        use                             generic-service
-        service_description             check_log
-	    check_command                   check_nrpe!check_log
-	    }	    

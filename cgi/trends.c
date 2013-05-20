@@ -3,7 +3,7 @@
  * TRENDS.C -  Icinga State Trends CGI
  *
  * Copyright (c) 1999-2009 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -258,9 +258,9 @@ int main(int argc, char **argv) {
 	/* read the CGI configuration file */
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+			print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 			document_footer(CGI_ID);
 		}
 		return ERROR;
@@ -269,9 +269,9 @@ int main(int argc, char **argv) {
 	/* read the main configuration file */
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+			print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 			document_footer(CGI_ID);
 		}
 		return ERROR;
@@ -307,20 +307,20 @@ int main(int argc, char **argv) {
 
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(NULL, ERROR_CGI_OBJECT_DATA);
+			print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 			document_footer(CGI_ID);
 		}
 		return ERROR;
 	}
 
 	/* read all status data */
-	result = read_all_status_data(get_cgi_config_location(), READ_ALL_STATUS_DATA);
+	result = read_all_status_data(main_config_file, READ_ALL_STATUS_DATA);
 	if (result == ERROR && daemon_check == TRUE) {
-		if (content_type == HTML_CONTENT) {
+		if (content_type != IMAGE_CONTENT) {
 			document_header(CGI_ID, FALSE, "错误");
-			print_error(NULL, ERROR_CGI_STATUS_DATA);
+			print_error(NULL, ERROR_CGI_STATUS_DATA, FALSE);
 			document_footer(CGI_ID);
 		}
 		return ERROR;
@@ -542,7 +542,7 @@ int main(int argc, char **argv) {
 				printf("<option value=%d %s>服务正常\n", AS_SVC_OK, (initial_assumed_service_state == AS_SVC_OK) ? "SELECTED" : "");
 				printf("<option value=%d %s>服务警报\n", AS_SVC_WARNING, (initial_assumed_service_state == AS_SVC_WARNING) ? "SELECTED" : "");
 				printf("<option value=%d %s>服务未知\n", AS_SVC_UNKNOWN, (initial_assumed_service_state == AS_SVC_UNKNOWN) ? "SELECTED" : "");
-				printf("<option value=%d %s>服务紧急\n", AS_SVC_CRITICAL, (initial_assumed_service_state == AS_SVC_CRITICAL) ? "SELECTED" : "");
+				printf("<option value=%d %s>服务严重\n", AS_SVC_CRITICAL, (initial_assumed_service_state == AS_SVC_CRITICAL) ? "SELECTED" : "");
 			}
 			printf("</select>\n");
 			printf("</td><td CLASS='optBoxItem' valign=top align=left>\n");
@@ -605,11 +605,11 @@ int main(int argc, char **argv) {
 	/* check authorization... */
 	if (display_type == DISPLAY_HOST_TRENDS) {
 		temp_host = find_host(host_name);
-		if (temp_host == NULL || is_authorized_for_host(temp_host, &current_authdata) == FALSE)
+		if (is_authorized_for_host(temp_host, &current_authdata) == FALSE)
 			is_authorized = FALSE;
 	} else if (display_type == DISPLAY_SERVICE_TRENDS) {
 		temp_service = find_service(host_name, service_desc);
-		if (temp_service == NULL || is_authorized_for_service(temp_service, &current_authdata) == FALSE)
+		if (is_authorized_for_service(temp_service, &current_authdata) == FALSE)
 			is_authorized = FALSE;
 	}
 	if (is_authorized == FALSE) {
@@ -1088,7 +1088,7 @@ int main(int argc, char **argv) {
 				printf("<option value=%d>服务正常\n",AS_SVC_OK);
 				printf("<option value=%d>服务警报\n",AS_SVC_WARNING);
 				printf("<option value=%d>服务未知\n",AS_SVC_UNKNOWN);
-				printf("<option value=%d>服务紧急\n",AS_SVC_CRITICAL);
+				printf("<option value=%d>服务严重\n",AS_SVC_CRITICAL);
 			}
 			printf("</select>\n");
 			printf("</td></tr>\n");
@@ -2145,7 +2145,7 @@ void graph_trend_data(int first_state, int last_state, time_t real_start_time, t
             height=40;
             break;
         case AS_SVC_CRITICAL:
-            strcpy(state_string,"紧急");
+            strcpy(state_string,"严重");
             height=20;
             break;
 		default:
@@ -2511,7 +2511,7 @@ void read_archived_state_data(void) {
 					temp_buffer = my_strtok(NULL, ";");
 					plugin_output = my_strtok(NULL, "\n");
 
-					if (strstr(temp_entry->entry_text, ";紧急;"))
+					if (strstr(temp_entry->entry_text, ";严重;"))
 						add_archived_state(AS_SVC_CRITICAL, state_type, temp_entry->timestamp, plugin_output);
 					else if (strstr(temp_entry->entry_text, ";警报;"))
 						add_archived_state(AS_SVC_WARNING, state_type, temp_entry->timestamp, plugin_output);
@@ -2635,7 +2635,7 @@ void draw_time_breakdowns(void) {
             gdImageStringFT(trends_image,&brect[0],color_darkgreen,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset-10-(gdFontSmall->w*5),drawing_y_offset+15,(char *)"运行");
             
             get_time_breakdown_string(total_time,time_down,"宕机",&temp_buffer[0],sizeof(temp_buffer));
-gdImageStringFT(trends_image,&brect[0],color_red,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset+drawing_width+20,drawing_y_offset+35,(char *)temp_buffer);
+			gdImageStringFT(trends_image,&brect[0],color_red,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset+drawing_width+20,drawing_y_offset+35,(char *)temp_buffer);
             gdImageStringFT(trends_image,&brect[0],color_red,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset-10-(gdFontSmall->w*5),drawing_y_offset+35,(char *)"宕机");
             
             get_time_breakdown_string(total_time,time_unreachable,"不可达",&temp_buffer[0],sizeof(temp_buffer));
@@ -2676,9 +2676,9 @@ gdImageStringFT(trends_image,&brect[0],color_red,font_file,SMALL_FONT_SIZE,0.0,d
             gdImageStringFT(trends_image,&brect[0],color_darkpink,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset+drawing_width+20,drawing_y_offset+55,(char *)temp_buffer);
             gdImageStringFT(trends_image,&brect[0],color_darkpink,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset-10-(gdFontSmall->w*5),drawing_y_offset+55,(char *)"未知");
             
-            get_time_breakdown_string(total_time,time_critical,"紧急",&temp_buffer[0],sizeof(temp_buffer));
+            get_time_breakdown_string(total_time,time_critical,"严重",&temp_buffer[0],sizeof(temp_buffer));
             gdImageStringFT(trends_image,&brect[0],color_red,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset+drawing_width+20,drawing_y_offset+75,(char *)temp_buffer);
-            gdImageStringFT(trends_image,&brect[0],color_red,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset-10-(gdFontSmall->w*5),drawing_y_offset+75,(char *)"紧急");
+            gdImageStringFT(trends_image,&brect[0],color_red,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset-10-(gdFontSmall->w*5),drawing_y_offset+75,(char *)"严重");
             
             get_time_breakdown_string(total_time,time_indeterminate,"不确定",&temp_buffer[0],sizeof(temp_buffer));
             gdImageStringFT(trends_image,&brect[0],color_black,font_file,SMALL_FONT_SIZE,0.0,drawing_x_offset+drawing_width+20,drawing_y_offset+95,(char *)temp_buffer);

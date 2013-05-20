@@ -3,7 +3,7 @@
  * EXTINFO.C -  Icinga Extended Information CGI
  *
  * Copyright (c) 1999-2009 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -43,7 +43,6 @@ static icinga_macros *mac;
 
 extern char             nagios_check_command[MAX_INPUT_BUFFER];
 extern char             nagios_process_info[MAX_INPUT_BUFFER];
-extern int              nagios_process_state;
 
 extern time_t		program_start;
 extern int              nagios_pid;
@@ -201,7 +200,7 @@ int main(void) {
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -210,7 +209,7 @@ int main(void) {
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+		print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -219,16 +218,16 @@ int main(void) {
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_OBJECT_DATA);
+		print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
 
 	/* read all status data */
-	result = read_all_status_data(get_cgi_config_location(), READ_ALL_STATUS_DATA);
+	result = read_all_status_data(main_config_file, READ_ALL_STATUS_DATA);
 	if (result == ERROR && daemon_check == TRUE) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_STATUS_DATA);
+		print_error(NULL, ERROR_CGI_STATUS_DATA, FALSE);
 		document_footer(CGI_ID);
 		free_memory();
 		return ERROR;
@@ -1233,8 +1232,7 @@ void show_process_info(void) {
 		printf("<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 CLASS='command'>\n");
 		printf("<TR><TD>\n");
 
-		if (nagios_process_state == STATE_OK) {
-			printf("<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 CLASS='command'>\n");
+		printf("<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 CLASS='command'>\n");
 
 #ifndef DUMMY_INSTALL
 			printf("<TR CLASS='command'><TD><img src='%s%s' border=0 ALT='关闭Icinga进程' TITLE='关闭Icinga进程'></td><td CLASS='command'><a href='%s?cmd_typ=%d'>关闭Icinga进程</a></td></tr>\n", url_images_path, STOP_ICON, CMD_CGI, CMD_SHUTDOWN_PROCESS);
@@ -1297,16 +1295,7 @@ void show_process_info(void) {
 			else
 				printf("<TR CLASS='command'><TD><img src='%s%s' border=0 ALT='启用性能数据' TITLE='启用性能数据'></td><td CLASS='command'><a href='%s?cmd_typ=%d'>启用性能数据</a></td></tr>\n", url_images_path, ENABLED_ICON, CMD_CGI, CMD_ENABLE_PERFORMANCE_DATA);
 
-			printf("</TABLE>\n");
-		} else {
-			printf("<DIV ALIGN=CENTER CLASS='infoMessage'>很显然Icinga没有运行, 暂时无法使用命令...\n");
-			if (!strcmp(nagios_check_command, "")) {
-				printf("<BR><BR>\n");
-				printf("提示:没有定义用于进程状态检查的命令.请检查CGI配置文件里的<b>nagios_check_command</b>选项<BR>\n");
-				printf("阅读更多关于在CGIs中检查Icinga的进程状态信息的文档.\n");
-			}
-			printf("</DIV>\n");
-		}
+		printf("</TABLE>\n");
 
 		printf("</TD></TR>\n");
 		printf("</TABLE>\n");
@@ -1478,31 +1467,31 @@ void show_host_info(void) {
 
 			get_time_string(&temp_hoststatus->last_notification, date_time, (int)sizeof(date_time), SHORT_DATE_TIME);
 			if (temp_hoststatus->last_notification == (time_t)0)
-				printf("\"最近通知\": null,\n");
+				printf("\"last_notification\": null,\n");
 			else
-				printf("\"最近通知\": \"%s\",\n", date_time);
-			printf("\"当前通知的成员\": %d,\n", temp_hoststatus->current_notification_number);
+				printf("\"last_notification\": \"%s\",\n", date_time);
+			printf("\"current_notification_number\": %d,\n", temp_hoststatus->current_notification_number);
 			if (temp_hoststatus->flap_detection_enabled == FALSE || enable_flap_detection == FALSE)
-				printf("\"主机抖动\": null,\n");
+				printf("\"host_is_flapping\": null,\n");
 			else
-				printf("\"主机抖动\": %s,\n", (temp_hoststatus->is_flapping == TRUE) ? "true" : "false");
-			printf("\"抖动状态变化率\": %3.2f,\n", temp_hoststatus->percent_state_change);
-			printf("\"安排宕机的主机\": %s,\n", (temp_hoststatus->scheduled_downtime_depth > 0) ? "true" : "false");
-			printf("\"已确认主机\": %s,\n", (temp_hoststatus->problem_has_been_acknowledged == TRUE) ? "true" : "false");
+				printf("\"host_is_flapping\": %s,\n", (temp_hoststatus->is_flapping == TRUE) ? "true" : "false");
+			printf("\"flapping_percent_state_change\": %3.2f,\n", temp_hoststatus->percent_state_change);
+			printf("\"host_in_scheduled_downtime\": %s,\n", (temp_hoststatus->scheduled_downtime_depth > 0) ? "true" : "false");
+			printf("\"host_has_been_acknowledged\": %s,\n", (temp_hoststatus->problem_has_been_acknowledged == TRUE) ? "true" : "false");
 
 			get_time_string(&temp_hoststatus->last_update, date_time, (int)sizeof(date_time), SHORT_DATE_TIME);
-			printf("\"最近更新\": \"%s\",\n", date_time);
+			printf("\"last_update\": \"%s\",\n", date_time);
 
-			printf("\"属性修改\": \"");
+			printf("\"modified_attributes\": \"");
 			print_modified_attributes(JSON_CONTENT, EXTINFO_CGI, temp_hoststatus->modified_attributes);
 			printf("\",\n");
 
-			printf("\"启用主动检查\": %s,\n", (temp_hoststatus->checks_enabled == TRUE) ? "true" : "false");
-			printf("\"启用被动检查\": %s,\n", (temp_hoststatus->accept_passive_host_checks == TRUE) ? "true" : "false");
-			printf("\"强迫主机\": %s,\n", (temp_hoststatus->obsess_over_host == TRUE) ? "true" : "false");
-			printf("\"启用通知\": %s,\n", (temp_hoststatus->notifications_enabled == TRUE) ? "true" : "false");
-			printf("\"启用事件处理\": %s,\n", (temp_hoststatus->event_handler_enabled == TRUE) ? "true" : "false");
-			printf("\"启用抖动检测\": %s\n", (temp_hoststatus->flap_detection_enabled == TRUE) ? "true" : "false");
+			printf("\"active_checks_enabled\": %s,\n", (temp_hoststatus->checks_enabled == TRUE) ? "true" : "false");
+			printf("\"passive_checks_enabled\": %s,\n", (temp_hoststatus->accept_passive_host_checks == TRUE) ? "true" : "false");
+			printf("\"obsess_over_host\": %s,\n", (temp_hoststatus->obsess_over_host == TRUE) ? "true" : "false");
+			printf("\"notifications_enabled\": %s,\n", (temp_hoststatus->notifications_enabled == TRUE) ? "true" : "false");
+			printf("\"event_handler_enabled\": %s,\n", (temp_hoststatus->event_handler_enabled == TRUE) ? "true" : "false");
+			printf("\"flap_detection_enabled\": %s\n", (temp_hoststatus->flap_detection_enabled == TRUE) ? "true" : "false");
 			if (is_authorized_for_read_only(&current_authdata) == FALSE || is_authorized_for_comments_read_only(&current_authdata) == TRUE) {
 
 				/* display comments */
@@ -1598,6 +1587,8 @@ void show_host_info(void) {
 			print_modified_attributes(HTML_CONTENT, EXTINFO_CGI, temp_hoststatus->modified_attributes);
 			printf("</td></tr>\n");
 
+			printf("<TR><TD CLASS='dataVar'>Executed Command:</TD><TD CLASS='dataVal'><A HREF='%s?type=command&host=%s&expand=%s'>Command Expander</A></TD></TR>\n", CONFIG_CGI, url_encode(host_name), url_encode(temp_host->host_check_command));
+
 			printf("</TABLE>\n");
 			printf("</TD></TR>\n");
 			printf("</TABLE>\n");
@@ -1645,7 +1636,7 @@ void show_host_info(void) {
 
 		printf("<TABLE BORDER='1' CELLPADDING=0 CELLSPACING=0><TR><TD>\n");
 
-		if (nagios_process_state == STATE_OK && is_authorized_for_read_only(&current_authdata) == FALSE) {
+		if (is_authorized_for_read_only(&current_authdata) == FALSE) {
 
 			printf("<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 CLASS='command'>\n");
 #ifdef USE_STATUSMAP
@@ -1718,11 +1709,8 @@ void show_host_info(void) {
             printf("重置修改的属性</a></td>");
 
 			printf("</TABLE>\n");
-		} else if (is_authorized_for_read_only(&current_authdata) == TRUE) {
-			printf("<DIV ALIGN=CENTER CLASS='infoMessage'您的帐户没有权限执行命令.<br>\n");
 		} else {
-			printf("<DIV ALIGN=CENTER CLASS='infoMessage'>很显然Icinga没有运行, 暂时无法使用命令...<br>\n");
-			printf("点击<a href='%s?type=%d'>这里</a>查看Icinga进程信息</DIV>\n", EXTINFO_CGI, DISPLAY_PROCESS_INFO);
+			print_generic_error_message("您的帐户没有权限执行命令.", NULL, 0);
 		}
 		printf("</TD></TR></TABLE>\n");
 
@@ -1994,8 +1982,8 @@ void show_service_info(void) {
 			printf("<TR><TD CLASS='dataVar'>最近检查时间:</TD><TD CLASS='dataVal'>%s</TD></TR>\n", date_time);
 
 			if (temp_svcstatus->checks_enabled == TRUE)
-				printf("<TR><TD CLASS='dataVar'>检查类型:</TD><TD CLASS='dataVal'><A HREF='%s?type=command&host=%s&service=%s&expand=%s'>主动</A></TD></TR>\n",
-				       CONFIG_CGI, host_name, service_desc, url_encode(temp_service->service_check_command));
+				printf("<TR><TD CLASS='dataVar'>检查类型:</TD><TD CLASS='dataVal'><A HREF='%s?type=command&host=%s&service=%s&expand=%s'>ACTIVE</A></TD></TR>\n",
+				       CONFIG_CGI, url_encode(host_name), url_encode(service_desc), url_encode(temp_service->service_check_command));
 			else if (temp_svcstatus->accept_passive_service_checks == TRUE)
 				printf("<TR><TD CLASS='dataVar'>检查类型:</TD><TD CLASS='dataVal'>被动</TD></TR>\n");
 			else
@@ -2034,6 +2022,8 @@ void show_service_info(void) {
 			printf("<TR><TD CLASS='dataVar'>属性修改:</td><td CLASS='dataVal'>");
 			print_modified_attributes(HTML_CONTENT, EXTINFO_CGI, temp_svcstatus->modified_attributes);
 			printf("</td></tr>\n");
+
+			printf("<TR><TD CLASS='dataVar'>Executed Command:</TD><TD CLASS='dataVal'><A HREF='%s?type=command&host=%s&service=%s&expand=%s'>Command Expander</A></TD></TR>\n", CONFIG_CGI, url_encode(host_name), url_encode(service_desc), url_encode(temp_service->service_check_command));
 
 			printf("</TABLE>\n");
 			printf("</TD></TR>\n");
@@ -2086,7 +2076,7 @@ void show_service_info(void) {
 		printf("<TABLE BORDER='1' CELLSPACING=0 CELLPADDING=0>\n");
 		printf("<TR><TD>\n");
 
-		if (nagios_process_state == STATE_OK &&  is_authorized_for_read_only(&current_authdata) == FALSE) {
+		if (is_authorized_for_read_only(&current_authdata) == FALSE) {
 			printf("<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 CLASS='command'>\n");
 
 			if (temp_svcstatus->checks_enabled) {
@@ -2178,11 +2168,8 @@ void show_service_info(void) {
 
 
 			printf("</table>\n");
-		} else if (is_authorized_for_read_only(&current_authdata) == TRUE) {
-			printf("<DIV ALIGN=CENTER CLASS='infoMessage'>您的帐户没有权限执行命令.<br>\n");
 		} else {
-			printf("<DIV CLASS='infoMessage'>很显然Icinga没有运行, 暂时无法使用命令...<br>\n");
-			printf("点击<a href='%s?type=%d'>这里</a>查看Icinga进程信息</DIV>\n", EXTINFO_CGI, DISPLAY_PROCESS_INFO);
+			print_generic_error_message("您的帐户没有权限执行命令.", NULL, 0);
 		}
 
 		printf("</td></tr>\n");
@@ -2234,7 +2221,7 @@ void show_hostgroup_info(void) {
 
 	printf("<DIV CLASS='dataTitle'>主机组命令</DIV>\n");
 
-	if (nagios_process_state == STATE_OK && is_authorized_for_read_only(&current_authdata) == FALSE) {
+	if (is_authorized_for_read_only(&current_authdata) == FALSE) {
 
 		printf("<TABLE border=0 CELLSPACING=0 CELLPADDING=0 CLASS='command' align='center'>\n");
 
@@ -2256,11 +2243,8 @@ void show_hostgroup_info(void) {
 
 		printf("</table>\n");
 
-	} else if (is_authorized_for_read_only(&current_authdata) == TRUE) {
-		print_generic_error_message("您的帐户没有权限执行命令.", NULL, 0);
 	} else {
-		printf("<DIV CLASS='infoMessage' align='center'>很显然Icinga没有运行, 暂时无法使用命令...<br>\n");
-		printf("Click <a href='%s?type=%d'>这里</a>查看Icinga进程信息</DIV>\n", EXTINFO_CGI, DISPLAY_PROCESS_INFO);
+		print_generic_error_message("您的帐户没有权限执行命令.", NULL, 0);
 	}
 
 	return;
@@ -2286,7 +2270,7 @@ void show_servicegroup_info() {
 
 	printf("<DIV CLASS='dataTitle'>服务组命令</DIV>\n");
 
-	if (nagios_process_state == STATE_OK) {
+	if (is_authorized_for_read_only(&current_authdata) == FALSE) {
 
 		printf("<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 CLASS='command' align='center'>\n");
 
@@ -2308,11 +2292,8 @@ void show_servicegroup_info() {
 
 		printf("</table>\n");
 
-	} else if (is_authorized_for_read_only(&current_authdata) == TRUE) {
-		print_generic_error_message("您的帐户没有权限执行命令.", NULL, 0);
 	} else {
-		printf("<DIV CLASS='infoMessage'>很显然Icinga没有运行, 暂时无法使用命令...<br>\n");
-		printf("Click <a href='%s?type=%d'>这里</a>查看Icinga进程信息</DIV>\n", EXTINFO_CGI, DISPLAY_PROCESS_INFO);
+		print_generic_error_message("您的帐户没有权限执行命令.", NULL, 0);
 	}
 
 	return;
@@ -2689,7 +2670,7 @@ void show_performance_data(void) {
 	printf("<TR><TD class='stateInfoTable1'>\n");
 	printf("<TABLE BORDER=0>\n");
 
-	printf("<tr class='data'><th class='data'>Time Frame</th><th class='data'>检查主机</th></tr>\n");
+	printf("<tr class='data'><th class='data'>时间框</th><th class='data'>检查主机</th></tr>\n");
 	printf("<tr><td class='dataVar'>&lt;= 1 分钟:</td><td class='dataVal'>%d (%.1f%%)</td></tr>", active_host_checks_1min, (double)(((double)active_host_checks_1min * 100.0) / (double)total_active_host_checks));
 	printf("<tr><td class='dataVar'>&lt;= 5 分钟:</td><td class='dataVal'>%d (%.1f%%)</td></tr>", active_host_checks_5min, (double)(((double)active_host_checks_5min * 100.0) / (double)total_active_host_checks));
 	printf("<tr><td class='dataVar'>&lt;= 15 分钟:</td><td class='dataVal'>%d (%.1f%%)</td></tr>", active_host_checks_15min, (double)(((double)active_host_checks_15min * 100.0) / (double)total_active_host_checks));
@@ -3348,14 +3329,17 @@ void show_downtime(int type) {
 			printf("<td CLASS='%s'>%s</td>", bg_class, (temp_downtime->fixed == TRUE) ?  "固定" : "可变");
 		}
 
-                get_time_string(&temp_downtime->trigger_time, date_time, (int)sizeof(date_time), SHORT_DATE_TIME);
-                if (content_type == JSON_CONTENT) {
-                        printf("\"触发时间\": \"%s\", ", date_time);
-                } else if (content_type == CSV_CONTENT) {
-                        printf("%s%s%s%s", csv_data_enclosure, date_time, csv_data_enclosure, csv_delimiter);
-                } else {
-                        printf("<td CLASS='%s'>%s</td>", bg_class, date_time);
-                }
+		get_time_string(&temp_downtime->trigger_time, date_time, (int)sizeof(date_time), SHORT_DATE_TIME);
+		if (content_type == JSON_CONTENT) {
+			if (temp_downtime->trigger_time != 0)
+				printf("\"触发时间\": \"%s\", ", date_time);
+			else
+				printf("\"触发时间\": null, ");
+		} else if (content_type == CSV_CONTENT) {
+			printf("%s%s%s%s", csv_data_enclosure, (temp_downtime->trigger_time != 0) ? date_time : "无", csv_data_enclosure, csv_delimiter);
+		} else {
+			printf("<td CLASS='%s'>%s</td>", bg_class, (temp_downtime->trigger_time != 0) ? date_time : "无");
+		}
 
 		get_time_breakdown(temp_downtime->duration, &days, &hours, &minutes, &seconds);
 		if (content_type == JSON_CONTENT) {

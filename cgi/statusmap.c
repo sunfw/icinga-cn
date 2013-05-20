@@ -3,7 +3,7 @@
  * STATUSMAP.C - Icinga Network Status Map CGI
  *
  * Copyright (c) 1999-2008 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * Description:
  *
@@ -241,8 +241,7 @@ int main(int argc, char **argv) {
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		if (content_type == HTML_CONTENT)
-			print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -257,8 +256,7 @@ int main(int argc, char **argv) {
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		if (content_type == HTML_CONTENT)
-			print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+		print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -267,18 +265,16 @@ int main(int argc, char **argv) {
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		if (content_type == HTML_CONTENT)
-			print_error(NULL, ERROR_CGI_OBJECT_DATA);
+		print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
 
 	/* read all status data */
-	result = read_all_status_data(get_cgi_config_location(), READ_ALL_STATUS_DATA);
+	result = read_all_status_data(main_config_file, READ_ALL_STATUS_DATA);
 	if (result == ERROR && daemon_check == TRUE) {
-		document_header(CGI_ID, FALSE, "Error");
-		if (content_type == HTML_CONTENT)
-			print_error(NULL, ERROR_CGI_STATUS_DATA);
+		document_header(CGI_ID, FALSE, "错误");
+		print_error(NULL, ERROR_CGI_STATUS_DATA, FALSE);
 		document_footer(CGI_ID);
 		free_memory();
 		return ERROR;
@@ -544,9 +540,9 @@ void display_page_header(void) {
 
 		if (show_all_hosts == FALSE) {
 			printf("<a href='%s?host=all&max_width=%d&max_height=%d'>查看所有主机的状态图</a><BR>", STATUSMAP_CGI, max_image_width, max_image_height);
-			printf("<a href='%s?host=%s'>查看该主机的状态详情</a><BR>\n", STATUS_CGI, url_encode(host_name));
+			printf("<a href='%s?host=%s'>查看该主机的状态详情</a><br>\n", STATUS_CGI, url_encode(host_name));
 		}
-		printf("<a href='%s?host=all&style=hostdetail'>查看所有主机的状态详情</a><BR>\n", STATUS_CGI);
+		printf("<a href='%s?host=all&style=hostdetail'>查看所有主机的状态详情</a><br>\n", STATUS_CGI);
 		printf("<a href='%s?host=all'>查看所有主机的概要状态</a>\n", STATUS_CGI);
 
 		printf("</TD></TR>\n");
@@ -1857,7 +1853,7 @@ void draw_host_text(char *name, int x, int y) {
 			else if (temp_hoststatus->status == HOST_UNREACHABLE)
 				strncpy(temp_buffer, "不可达", sizeof(temp_buffer));
 			else //catch any other state (just in case)
-				strncpy(temp_buffer, "保持", sizeof(temp_buffer));
+				strncpy(temp_buffer, "维护", sizeof(temp_buffer));
 			status_color = color_grey;
 		} else if (temp_hoststatus->status == HOST_DOWN) {
 			strncpy(temp_buffer, "宕机", sizeof(temp_buffer));
@@ -1945,15 +1941,15 @@ void write_host_popup_text(host *hst) {
 	/* first, we mark it as maintenance if that is preferred */
 	if (suppress_maintenance_downtime == TRUE && temp_status->scheduled_downtime_depth > 0) {
 		if (temp_status->status == HOST_UP)
-			printf("<font color=gray>运行 (保持)");
+			printf("<font color=gray>运行 (维护)");
 		else if (temp_status->status == HOST_DOWN)
-			printf("<font color=gray>宕机 (保持)");
+			printf("<font color=gray>宕机 (维护)");
 		else if (temp_status->status == HOST_UNREACHABLE)
-			printf("<font color=gray>不可达 (保持)");
+			printf("<font color=gray>不可达 (维护)");
 		else if (temp_status->status == HOST_PENDING)
-			printf("<font color=gray>未决 (保持)");
+			printf("<font color=gray>未决 (维护)");
 		else //catch any other state (just in case)
-			printf("<font color=gray>保持");
+			printf("<font color=gray>维护");
 
 		if (temp_status->problem_has_been_acknowledged == TRUE) //somewhat meaningless in this context, but possible
 			printf(" (已确认)");

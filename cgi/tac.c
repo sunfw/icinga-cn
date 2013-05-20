@@ -3,7 +3,7 @@
  * TAC.C - Icinga Tactical Monitoring Overview CGI
  *
  * Copyright (c) 2001-2008 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * This CGI program will display the contents of the Icinga
  * log file.
@@ -64,7 +64,6 @@ extern int accept_passive_service_checks;
 extern int accept_passive_host_checks;
 extern int enable_event_handlers;
 extern int enable_flap_detection;
-extern int nagios_process_state;
 extern int tac_show_only_hard_state;
 extern int show_tac_header;
 extern int show_tac_header_pending;
@@ -432,7 +431,7 @@ int main(void) {
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, tac_header);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -445,7 +444,7 @@ int main(void) {
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+		print_error(main_config_file, ERROR_CGI_MAIN_CFG, tac_header);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -458,7 +457,7 @@ int main(void) {
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_OBJECT_DATA);
+		print_error(NULL, ERROR_CGI_OBJECT_DATA, tac_header);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -468,10 +467,10 @@ int main(void) {
 #endif
 
 	/* read all status data */
-	result = read_all_status_data(get_cgi_config_location(), READ_ALL_STATUS_DATA);
+	result = read_all_status_data(main_config_file, READ_ALL_STATUS_DATA);
 	if (result == ERROR && daemon_check == TRUE) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_STATUS_DATA);
+		print_error(NULL, ERROR_CGI_STATUS_DATA, tac_header);
 		document_footer(CGI_ID);
 		free_memory();
 		return ERROR;
@@ -1393,10 +1392,10 @@ void display_tac_overview(void) {
 
 
 		printf("<div class='tacheader-status %s'>", tacheader_color);
-		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d&hoststatustypes=%d&serviceprops=%d' title='%s紧急'> %d </a>/", STATUS_CGI, SERVICE_CRITICAL, HOST_UP | HOST_PENDING, SERVICE_NO_SCHEDULED_DOWNTIME | SERVICE_STATE_UNACKNOWLEDGED | SERVICE_NOT_ALL_CHECKS_DISABLED, TAC_TITLE_SVC_UNACK_SERVICES, services_critical_active_unacknowledged + services_critical_passive_unacknowledged);
-		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d&hoststatustypes=%d&serviceprops=%d' title='%s紧急'> %d </a>/", STATUS_CGI, SERVICE_CRITICAL, HOST_UP | HOST_PENDING, SERVICE_NO_SCHEDULED_DOWNTIME | SERVICE_STATE_ACKNOWLEDGED | SERVICE_NOT_ALL_CHECKS_DISABLED, TAC_TITLE_SVC_ACK_SERVICES, services_critical_active_acknowledged + services_critical_passive_acknowledged);
-		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d&serviceprops=%d' title='%s紧急'> %d </a>", STATUS_CGI, SERVICE_CRITICAL, SERVICE_STATE_HANDLED, TAC_TITLE_SVC_NON_URGENT, handled_count);
-		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d' title='%s紧急'> 紧急 </a>&nbsp;</div>\n", STATUS_CGI, SERVICE_CRITICAL, TAC_TITLE_SVC_ALL);
+		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d&hoststatustypes=%d&serviceprops=%d' title='%s严重> %d </a>/", STATUS_CGI, SERVICE_CRITICAL, HOST_UP | HOST_PENDING, SERVICE_NO_SCHEDULED_DOWNTIME | SERVICE_STATE_UNACKNOWLEDGED | SERVICE_NOT_ALL_CHECKS_DISABLED, TAC_TITLE_SVC_UNACK_SERVICES, services_critical_active_unacknowledged + services_critical_passive_unacknowledged);
+		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d&hoststatustypes=%d&serviceprops=%d' title='%s严重'> %d </a>/", STATUS_CGI, SERVICE_CRITICAL, HOST_UP | HOST_PENDING, SERVICE_NO_SCHEDULED_DOWNTIME | SERVICE_STATE_ACKNOWLEDGED | SERVICE_NOT_ALL_CHECKS_DISABLED, TAC_TITLE_SVC_ACK_SERVICES, services_critical_active_acknowledged + services_critical_passive_acknowledged);
+		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d&serviceprops=%d' title='%s严重'> %d </a>", STATUS_CGI, SERVICE_CRITICAL, SERVICE_STATE_HANDLED, TAC_TITLE_SVC_NON_URGENT, handled_count);
+		printf("<a target='main' href='%s?host=all&type=detail&servicestatustypes=%d' title='%s严重'> 严重 </a>&nbsp;</div>\n", STATUS_CGI, SERVICE_CRITICAL, TAC_TITLE_SVC_ALL);
 		printf("</div>\n");
 		printf("</td>\n");
 
@@ -1655,41 +1654,41 @@ void display_tac_overview(void) {
 		printf("\"未确认禁用主机宕机服务警报\": %d,\n", services_warning_disabled_unacknowledged_host_down);
 
 		/* CRITICAL */
-		printf("\"服务紧急\": %d,\n", services_critical);
-		printf("\"主机宕机服务紧急\": %d,\n", services_critical_host_down);
-		printf("\"主动服务紧急\": %d,\n", services_critical_active);
-		printf("\"主动主机宕机服务紧急\": %d,\n", services_critical_active_host_down);
-		printf("\"被动服务紧急\": %d,\n", services_critical_passive);
-		printf("\"被动主机宕机服务紧急\": %d,\n", services_critical_passive_host_down);
-		printf("\"禁用服务紧急\": %d,\n", services_critical_disabled);
-		printf("\"禁用主机宕机服务紧急\": %d,\n", services_critical_disabled_host_down);
+		printf("\"服务严重\": %d,\n", services_critical);
+		printf("\"主机宕机服务严重\": %d,\n", services_critical_host_down);
+		printf("\"主动服务严重\": %d,\n", services_critical_active);
+		printf("\"主动主机宕机服务严重\": %d,\n", services_critical_active_host_down);
+		printf("\"被动服务严重\": %d,\n", services_critical_passive);
+		printf("\"被动主机宕机服务严重\": %d,\n", services_critical_passive_host_down);
+		printf("\"禁用服务严重\": %d,\n", services_critical_disabled);
+		printf("\"禁用主机宕机服务严重\": %d,\n", services_critical_disabled_host_down);
 
-		printf("\"安排服务紧急\": %d,\n", services_critical_scheduled);
-		printf("\"安排主机宕机服务紧急\": %d,\n", services_critical_scheduled_host_down);
-		printf("\"安排主动服务紧急\": %d,\n", services_critical_active_scheduled);
-		printf("\"安排主动主机宕机服务紧急\": %d,\n", services_critical_active_scheduled_host_down);
-		printf("\"安排被动服务紧急\": %d,\n", services_critical_passive_scheduled);
-		printf("\"安排被动主机宕机服务紧急\": %d,\n", services_critical_passive_scheduled_host_down);
-		printf("\"安排禁用服务紧急\": %d,\n", services_critical_disabled_scheduled);
-		printf("\"安排禁用主机宕机服务紧急\": %d,\n", services_critical_disabled_scheduled_host_down);
+		printf("\"安排服务严重\": %d,\n", services_critical_scheduled);
+		printf("\"安排主机宕机服务严重\": %d,\n", services_critical_scheduled_host_down);
+		printf("\"安排主动服务严重\": %d,\n", services_critical_active_scheduled);
+		printf("\"安排主动主机宕机服务严重\": %d,\n", services_critical_active_scheduled_host_down);
+		printf("\"安排被动服务严重\": %d,\n", services_critical_passive_scheduled);
+		printf("\"安排被动主机宕机服务严重\": %d,\n", services_critical_passive_scheduled_host_down);
+		printf("\"安排禁用服务严重\": %d,\n", services_critical_disabled_scheduled);
+		printf("\"安排禁用主机宕机服务严重\": %d,\n", services_critical_disabled_scheduled_host_down);
 
-		printf("\"确认服务紧急\": %d,\n", services_critical_acknowledged);
-		printf("\"确认主机宕机服务紧急\": %d,\n", services_critical_acknowledged_host_down);
-		printf("\"确认主动服务紧急\": %d,\n", services_critical_active_acknowledged);
-		printf("\"确认主动主机宕机服务紧急\": %d,\n", services_critical_active_acknowledged_host_down);
-		printf("\"确认被动服务紧急\": %d,\n", services_critical_passive_acknowledged);
-		printf("\"确认被动主机宕机服务紧急\": %d,\n", services_critical_passive_acknowledged_host_down);
-		printf("\"确认禁用服务紧急\": %d,\n", services_critical_disabled_acknowledged);
-		printf("\"确认禁用主机宕机服务紧急\": %d,\n", services_critical_disabled_acknowledged_host_down);
+		printf("\"确认服务严重\": %d,\n", services_critical_acknowledged);
+		printf("\"确认主机宕机服务严重\": %d,\n", services_critical_acknowledged_host_down);
+		printf("\"确认主动服务严重\": %d,\n", services_critical_active_acknowledged);
+		printf("\"确认主动主机宕机服务严重\": %d,\n", services_critical_active_acknowledged_host_down);
+		printf("\"确认被动服务严重\": %d,\n", services_critical_passive_acknowledged);
+		printf("\"确认被动主机宕机服务严重\": %d,\n", services_critical_passive_acknowledged_host_down);
+		printf("\"确认禁用服务严重\": %d,\n", services_critical_disabled_acknowledged);
+		printf("\"确认禁用主机宕机服务严重\": %d,\n", services_critical_disabled_acknowledged_host_down);
 
-		printf("\"未确认服务紧急\": %d,\n", services_critical_unacknowledged);
-		printf("\"未确认主机宕机服务紧急\": %d,\n", services_critical_unacknowledged_host_down);
-		printf("\"未确认主动服务紧急\": %d,\n", services_critical_active_unacknowledged);
-		printf("\"未确认主动主机宕机服务紧急\": %d,\n", services_critical_active_unacknowledged_host_down);
-		printf("\"未确认被动服务紧急\": %d,\n", services_critical_passive_unacknowledged);
-		printf("\"未确认被动主机宕机服务紧急\": %d,\n", services_critical_passive_unacknowledged_host_down);
-		printf("\"未确认禁用服务紧急\": %d,\n", services_critical_disabled_unacknowledged);
-		printf("\"未确认禁用主机宕机服务紧急\": %d,\n", services_critical_disabled_unacknowledged_host_down);
+		printf("\"未确认服务紧严重\": %d,\n", services_critical_unacknowledged);
+		printf("\"未确认主机宕机服务严重\": %d,\n", services_critical_unacknowledged_host_down);
+		printf("\"未确认主动服务严重\": %d,\n", services_critical_active_unacknowledged);
+		printf("\"未确认主动主机宕机服务严重\": %d,\n", services_critical_active_unacknowledged_host_down);
+		printf("\"未确认被动服务严重\": %d,\n", services_critical_passive_unacknowledged);
+		printf("\"未确认被动主机宕机服务严重\": %d,\n", services_critical_passive_unacknowledged_host_down);
+		printf("\"未确认禁用服务严重\": %d,\n", services_critical_disabled_unacknowledged);
+		printf("\"未确认禁用主机宕机服务严重\": %d,\n", services_critical_disabled_unacknowledged_host_down);
 
 		/* UNKNOWN */
 		printf("\"服务未知\": %d,\n", services_unknown);
@@ -2228,7 +2227,7 @@ void display_tac_overview(void) {
 	printf("<tr><td colspan=5 height=20 class='serviceTitle'>&nbsp;服务</td></tr>\n");
 
 	printf("<tr>\n");
-	printf("<td class='serviceHeader' width=125><a href='%s?host=all&style=detail&servicestatustypes=%d' class='serviceHeader'>%d紧急</a></td>\n", STATUS_CGI, SERVICE_CRITICAL, services_critical + services_critical_host_down);
+	printf("<td class='serviceHeader' width=125><a href='%s?host=all&style=detail&servicestatustypes=%d' class='serviceHeader'>%d严重</a></td>\n", STATUS_CGI, SERVICE_CRITICAL, services_critical + services_critical_host_down);
 	printf("<td class='serviceHeader' width=125><a href='%s?host=all&style=detail&servicestatustypes=%d' class='serviceHeader'>%d警报</a></td>\n", STATUS_CGI, SERVICE_WARNING, services_warning + services_warning_host_down);
 	printf("<td class='serviceHeader' width=125><a href='%s?host=all&style=detail&servicestatustypes=%d' class='serviceHeader'>%d未知</a></td>\n", STATUS_CGI, SERVICE_UNKNOWN, services_unknown + services_unknown_host_down);
 	printf("<td class='serviceHeader' width=125><a href='%s?host=all&style=detail&servicestatustypes=%d' class='serviceHeader'>%d正常</a></td>\n", STATUS_CGI, SERVICE_OK, services_ok + services_ok_host_down);

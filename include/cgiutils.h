@@ -3,7 +3,7 @@
  * CGIUTILS.H - Header file for common CGI functions
  *
  * Copyright (c) 1999-2008  Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org) 
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org) 
  *
  * License:
  * 
@@ -78,9 +78,6 @@ extern "C" {
 #define TAC_CGI_ID		13
 #define TRENDS_CGI_ID		14
 
-/* for error msg */
-#define ERROR_CGI_ID		20
-
 
 /******************************* ERROR CGI IDS **********************************/
 
@@ -88,7 +85,6 @@ extern "C" {
 #define ERROR_CGI_OBJECT_DATA	2
 #define ERROR_CGI_CFG_FILE	3
 #define ERROR_CGI_MAIN_CFG	4
-#define ERROR_CGI_RESOURCE_CFG	5
 
 
 /**************************** STYLE SHEET NAMES ******************************/
@@ -148,7 +144,7 @@ extern "C" {
 #define OK_ICON				"recovery.png"
 #define OK_ICON_ALT			"服务正常"
 #define CRITICAL_ICON			"critical.png"
-#define CRITICAL_ICON_ALT		"服务紧急"
+#define CRITICAL_ICON_ALT		"服务严重"
 #define WARNING_ICON			"warning.png"
 #define WARNING_ICON_ALT		"服务警报"
 #define UNKNOWN_ICON			"unknown.png"
@@ -440,7 +436,7 @@ extern "C" {
 
 /************************** JSON OUTPUT VERSION ************************/
 
-#define JSON_OUTPUT_VERSION "1.8.0"
+#define JSON_OUTPUT_VERSION "1.9.0"
 
 
 /************************** BUFFER  ***************************************/
@@ -555,12 +551,17 @@ void strip_splunk_query_terms(char *);
 void include_ssi_files(char *,int);				/* include user-defined SSI footers/headers */
 void include_ssi_file(char *);					/* include user-defined SSI footer/header */
 
-void cgi_config_file_error(char *);
-void main_config_file_error(char *);
-void icinga_resource_file_error(char *);
-void object_data_error(void);
-void status_data_error(void);
-void print_error(char*, int);
+void cgi_config_file_error(char *,int);
+void main_config_file_error(char *,int);
+void object_data_error(int);
+void status_data_error(int);
+
+/** @brief prints main errors depending on error_type
+ *  @param [in] config_file name otherwise set to NULL
+ *  @param [in] error_type to set the correct error message
+ *  @param [in] tac_header TRUE if tac_header otherwise FALSE
+**/
+void print_error(char*, int, int);
 
 void document_header(int,int, char *);				/* print document header */
 void document_footer(int);					/* print document footer */

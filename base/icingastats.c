@@ -3,8 +3,8 @@
  * ICINGASTATS.C - Displays Icinga Statistics
  *
  * Copyright (c) 2003-2008 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Nagios Core Development Team and Community Contributors
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 		printf("\n%s Stats %s\n", PROGRAM_NAME, PROGRAM_VERSION);
 		printf("Copyright (c) 2009 Nagios Core Development Team and Community Contributors\n");
 		printf("Copyright (c) 1999-2009 Ethan Galstad\n");
-		printf("最近修改: %s\n", PROGRAM_MODIFICATION_DATE);
+		printf("Last Modified: %s\n", PROGRAM_MODIFICATION_DATE);
 		printf("License: GPL\n\n");
 	}
 

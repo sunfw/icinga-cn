@@ -3,7 +3,7 @@
  * SHOWLOG.C - Icinga Log File CGI
  *
  * Copyright (c) 1999-2009 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -124,7 +124,7 @@ int main(void) {
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -133,7 +133,7 @@ int main(void) {
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+		print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -142,7 +142,7 @@ int main(void) {
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_OBJECT_DATA);
+		print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -906,7 +906,7 @@ void show_filter(void) {
 	printf("<td nowrap><input type=radio name='order' value='new2old' %s> 较新的首个条目&nbsp;&nbsp;| <input type=radio name='order' value='old2new' %s> 较旧的首个条目</td></tr>", (reverse == TRUE) ? "" : "checked", (reverse == TRUE) ? "checked" : "");
 
 	/* Timeperiod */
-	printf("<tr><td align=left>周期:</td>");
+	printf("<tr><td align=left>时间周期:</td>");
 	printf("<td align=left>");
 
 	printf("<select id='selecttp' name='timeperiod' onChange=\"var i=document.getElementById('selecttp').selectedIndex; if (document.getElementById('selecttp').options[i].value == 'custom') { document.getElementById('custtime').style.display = ''; } else { document.getElementById('custtime').style.display = 'none';}\">\n");
@@ -951,7 +951,7 @@ void show_filter(void) {
 	printf("</td></tr>\n");
 
 	/* submit Button */
-	printf("<tr><td><input type='submit' value='应用'></td><td align=right><input type='reset' value='重置' onClick=\"window.location.href='%s?order=new2old&timeperiod=singleday&ts_start=%lu&ts_end=%lu'\">&nbsp;</td></tr>\n", SHOWLOG_CGI, ts_start, ts_end);
+	printf("<tr><td><input type='submit' value='应用'></td><td align=right><input type='reset' value='重置' onClick=\"window.location.href='%s?order=new2old&timeperiod=singleday&limit=%d'\">&nbsp;</td></tr>\n", SHOWLOG_CGI, result_limit);
 
 	printf("</table>\n");
 

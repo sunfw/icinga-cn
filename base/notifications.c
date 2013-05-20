@@ -3,8 +3,8 @@
  * NOTIFICATIONS.C - Service and host notification functions for Icinga
  *
  * Copyright (c) 1999-2008 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Nagios Core Development Team and Community Contributors
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -55,6 +55,20 @@ extern int		enable_state_based_escalation_ranges;
 int check_escalation_condition(escalation_condition*);
 
 int dummy;	/* reduce compiler warnings */
+
+const char *notification_reason_name (unsigned int reason_type) {
+	static const char *names[] = {
+		"NORMAL", "ACKNOWLEDGEMENT",
+		"开始抖动", "停止抖动", "禁用抖动",
+		"开始宕机", "结束宕机", "取消宕机",
+		"自定义", "跟踪"
+	};
+
+	if (reason_type < sizeof(names))
+		return names[reason_type];
+
+	return "(未知)";
+}
 
 /******************************************************************/
 /***************** SERVICE NOTIFICATION FUNCTIONS *****************/

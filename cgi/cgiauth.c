@@ -3,7 +3,7 @@
  * CGIAUTH.C - Authorization utilities for Icinga CGIs
  *
  * Copyright (c) 1999-2008 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -223,7 +223,7 @@ int parse_authorization_config_file(char* filename, authdata* authinfo) {
 
 	/* Shibboleth environment variable */
 	if (getenv("entitlement") == NULL) {
-		//printf("<P><DIV CLASS='errorMessage'>»œ÷§–≈œ¢:  ⁄»®±‰¡øŒ™ø’</DIV></P>");
+		//printf("<P><DIV CLASS='errorMessage'>授权信息: 授权变量为空</DIV></P>");
 		return ERROR;
 	}
 

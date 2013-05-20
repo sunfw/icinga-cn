@@ -4,7 +4,7 @@
  *
  * Copyright (c) 1999-2010 Ethan Galstad (egalstad@nagios.org)
  * Copyright (c) 2012 Nagios Core Development Team and Community Contributors
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * Last Modified: 08-08-2010
  *
@@ -618,7 +618,7 @@ int main(void) {
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -627,7 +627,7 @@ int main(void) {
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+		print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -636,16 +636,16 @@ int main(void) {
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_OBJECT_DATA);
+		print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
 
 	/* read all status data */
-	result = read_all_status_data(get_cgi_config_location(), READ_ALL_STATUS_DATA);
+	result = read_all_status_data(main_config_file, READ_ALL_STATUS_DATA);
 	if (result == ERROR && daemon_check == TRUE) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_STATUS_DATA);
+		print_error(NULL, ERROR_CGI_STATUS_DATA, FALSE);
 		document_footer(CGI_ID);
 		free_memory();
 		return ERROR;
@@ -1022,6 +1022,9 @@ int main(void) {
 		/* get the host status information */
 		temp_hoststatus = find_hoststatus(temp_service->host_name);
 
+		if (temp_hoststatus == NULL)
+			continue;
+
 		/* check host properties filter */
 		if (passes_host_properties_filter(temp_hoststatus) == FALSE)
 			continue;
@@ -1037,7 +1040,7 @@ int main(void) {
 		if (display_type == DISPLAY_HOSTS && show_all_hosts == FALSE && search_string == NULL) {
 			found = FALSE;
 			for (i = 0; req_hosts[i].entry != NULL; i++) {
-				if (!strcmp(req_hosts[i].entry, temp_hoststatus->host_name) || !strcmp(req_hosts[i].entry, temp_host->display_name)) {
+				if (!strcmp(req_hosts[i].entry, temp_hoststatus->host_name) || (temp_host != NULL && !strcmp(req_hosts[i].entry, temp_host->display_name))) {
 					found = TRUE;
 					break;
 				}
@@ -1072,7 +1075,7 @@ int main(void) {
 			temp_hoststatus->added |= STATUS_COUNTED_UNFILTERED;
 		}
 
-		/* see if we should display services for hosts with tis type of status */
+		/* see if we should display services for hosts with this type of status */
 		if (!(host_status_types & temp_hoststatus->status))
 			continue;
 
@@ -2346,6 +2349,9 @@ void show_service_detail(void) {
 
 		/* find the host */
 		temp_host = find_host(temp_status->host_name);
+
+		if (temp_host == NULL)
+			continue;
 
 		/* find the service  */
 		temp_service = find_service(temp_status->host_name, temp_status->svc_description);
@@ -4653,9 +4659,9 @@ void show_servicegroup_hostgroup_member_overview(hoststatus *hststatus, int odd,
 	status[sizeof(status) - 1] = '\x0';
 
 	if (content_type == JSON_CONTENT) {
-		printf("{ \"host_name\": \"%s\", ", json_encode(hststatus->host_name));
-		printf("\"host_display_name\": \"%s\", ", (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
-		printf("\"host_status\": \"%s\", ", status);
+		printf("{ \"主机名称\": \"%s\", ", json_encode(hststatus->host_name));
+		printf("\"主机显示的名称\": \"%s\", ", (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
+		printf("\"主机状态\": \"%s\", ", status);
 		show_servicegroup_hostgroup_member_service_status_totals(hststatus->host_name, data);
 		printf("}\n");
 	} else {
@@ -5678,10 +5684,10 @@ int show_hostgroup_grid(hostgroup *temp_hostgroup) {
 				printf(",\n");
 			json_start = FALSE;
 
-			printf("{ \"host_name\": \"%s\",\n", json_encode(temp_host->name));
-			printf("\"host_display_name\": \"%s\", ", (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
-			printf("\"host_status\": \"%s\",\n", status);
-			printf("\"services\": [ \n");
+			printf("{ \"主机名称\": \"%s\",\n", json_encode(temp_host->name));
+			printf("\"主机显示的名称\": \"%s\", ", (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
+			printf("\"主机状态\": \"%s\",\n", status);
+			printf("\"服务\": [ \n");
 		} else {
 			printf("<TD CLASS='status%s'>", host_status_class);
 
@@ -6569,11 +6575,11 @@ void show_filters(void) {
 				found = 1;
 			}
 			if (host_properties & HOST_HARD_STATE) {
-				printf("%s处于硬状态", (found == 1) ? " &amp;" : "");
+				printf("%s处于硬件状态", (found == 1) ? " &amp;" : "");
 				found = 1;
 			}
 			if (host_properties & HOST_SOFT_STATE) {
-				printf("%s处于软状态", (found == 1) ? " &amp;" : "");
+				printf("%s处于软件状态", (found == 1) ? " &amp;" : "");
 				found = 1;
 			}
 			if (host_properties & HOST_STATE_HANDLED) {
@@ -6865,7 +6871,7 @@ void print_displayed_names(int style) {
 						break;
 					}
 					if (i != 0) {
-						((num_req_hosts - i) == 1) ? printf(" 和 ") : printf(", ");
+						((num_req_hosts - i) == 1) ? printf(" and ") : printf(", ");
 					}
 					printf("'%s'", html_encode(req_hosts[i].entry, TRUE));
 				}
@@ -6885,7 +6891,7 @@ void print_displayed_names(int style) {
 						break;
 					}
 					if (i != 0) {
-						((num_req_servicegroups - i) == 1) ? printf(" 和 ") : printf(", ");
+						((num_req_servicegroups - i) == 1) ? printf(" and ") : printf(", ");
 					}
 					printf("'%s'", html_encode(req_servicegroups[i].entry, TRUE));
 				}
@@ -6907,7 +6913,7 @@ void print_displayed_names(int style) {
 						break;
 					}
 					if (i != 0) {
-						((num_req_hostgroups - i) == 1) ? printf(" 和 ") : printf(", ");
+						((num_req_hostgroups - i) == 1) ? printf(" and ") : printf(", ");
 					}
 					printf("'%s'", html_encode(req_hostgroups[i].entry, TRUE));
 				}

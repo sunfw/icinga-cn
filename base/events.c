@@ -3,8 +3,8 @@
  * EVENTS.C - Timed event functions for Icinga
  *
  * Copyright (c) 1999-2010 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Nagios Core Development Team and Community Contributors
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -359,7 +359,7 @@ void init_timing_loop(void) {
 
 			/* skip services that are already scheduled for the future (from retention data), but reschedule ones that were supposed to happen while we weren't running... */
 			if (temp_service->next_check > current_time) {
-				log_debug_info(DEBUGL_EVENTS, 2, "在未来已安排进行服务检查: %s\n", ctime(&temp_service->next_check));
+				log_debug_info(DEBUGL_EVENTS, 2, "在将来已安排进行服务检查: %s\n", ctime(&temp_service->next_check));
 				continue;
 			}
 
@@ -508,7 +508,7 @@ void init_timing_loop(void) {
 
 		/* skip hosts that are already scheduled for the future (from retention data), but reschedule ones that were supposed to be checked before we started */
 		if (temp_host->next_check > current_time) {
-			log_debug_info(DEBUGL_EVENTS, 2, "在未来已安排进行主机检查: %s\n", ctime(&temp_host->next_check));
+			log_debug_info(DEBUGL_EVENTS, 2, "在将来已安排进行主机检查: %s\n", ctime(&temp_host->next_check));
 			continue;
 		}
 

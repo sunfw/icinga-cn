@@ -3,7 +3,7 @@
  * AVAIL.C -  Icinga Availability CGI
  *
  * Copyright (c) 2000-2010 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -271,7 +271,7 @@ int main(int argc, char **argv) {
 	result = read_cgi_config_file(get_cgi_config_location());
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE);
+		print_error(get_cgi_config_location(), ERROR_CGI_CFG_FILE, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 	result = read_main_config_file(main_config_file);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(main_config_file, ERROR_CGI_MAIN_CFG);
+		print_error(main_config_file, ERROR_CGI_MAIN_CFG, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -289,16 +289,16 @@ int main(int argc, char **argv) {
 	result = read_all_object_configuration_data(main_config_file, READ_ALL_OBJECT_DATA);
 	if (result == ERROR) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_OBJECT_DATA);
+		print_error(NULL, ERROR_CGI_OBJECT_DATA, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
 
 	/* read all status data */
-	result = read_all_status_data(get_cgi_config_location(), READ_ALL_STATUS_DATA);
+	result = read_all_status_data(main_config_file, READ_ALL_STATUS_DATA);
 	if (result == ERROR && daemon_check == TRUE) {
 		document_header(CGI_ID, FALSE, "错误");
-		print_error(NULL, ERROR_CGI_STATUS_DATA);
+		print_error(NULL, ERROR_CGI_STATUS_DATA, FALSE);
 		document_footer(CGI_ID);
 		return ERROR;
 	}
@@ -3322,9 +3322,9 @@ void write_log_entries(avail_subject *subject) {
 			printf(" \"条目类型\": \"%s\", ", entry_type);
 			printf(" \"状态类型\": \"");
 			if (temp_as->state_type == AS_HARD_STATE)
-				printf("硬状态");
+				printf("硬件状态");
 			else if (temp_as->state_type == AS_SOFT_STATE)
-				printf("软状态");
+				printf("软件状态");
 			printf("\", ");
 			printf(" \"状态信息\": \"%s\"}", (temp_as->state_info == NULL) ? "" : json_encode(temp_as->state_info));
 
@@ -3536,7 +3536,7 @@ void display_specific_hostgroup_availability(hostgroup *hg) {
 
 			/* host name */
 			printf("{ \"%s\": \"%s\", ", hheader[0], json_encode(temp_subject->host_name));
-			printf("{ \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
+			printf(" \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
 
 			/* up times */
 			printf(" \"%s\": %lu, ", hheader[1], temp_subject->scheduled_time_up);
@@ -3935,7 +3935,7 @@ void display_specific_servicegroup_availability(servicegroup *sg) {
 
 			/* host name */
 			printf("{ \"%s\": \"%s\", ", hheader[0], json_encode(temp_subject->host_name));
-			printf("{ \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
+			printf(" \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
 
 			/* up times */
 			printf(" \"%s\": %lu, ", hheader[1], temp_subject->scheduled_time_up);
@@ -4694,7 +4694,7 @@ void display_host_availability(void) {
 
 				/* host name */
 				printf("{ \"%s\": \"%s\", ", hheader[0], json_encode(temp_subject->host_name));
-				printf("{ \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
+				printf(" \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
 
 				/* up times */
 				printf(" \"%s\": %lu, ", hheader[1], temp_subject->scheduled_time_up);
@@ -5122,7 +5122,7 @@ void display_host_availability(void) {
 
 				/* host name */
 				printf("{ \"%s\": \"%s\", ", hheader[0], json_encode(temp_subject->host_name));
-				printf("{ \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
+				printf(" \"%s\": \"%s\", ", hheader[37], (temp_host->display_name != NULL) ? json_encode(temp_host->display_name) : json_encode(temp_host->name));
 
 				/* up times */
 				printf(" \"%s\": %lu, ", hheader[1], temp_subject->scheduled_time_up);

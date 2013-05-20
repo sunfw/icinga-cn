@@ -43,7 +43,11 @@ CFLAGS=@CFLAGS@ @DEFS@ -DNSCGI
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 
+<<<<<<< HEAD
 CGIS=avail.cgi cmd.cgi config.cgi extinfo.cgi history.cgi notifications.cgi outages.cgi showlog.cgi status.cgi statusmap.cgi statuswml.cgi summary.cgi tac.cgi $(CGIEXTRAS)
+=======
+CGIS=avail.cgi cmd.cgi config.cgi extinfo.cgi history.cgi notifications.cgi outages.cgi showlog.cgi status.cgi statusmap.cgi summary.cgi tac.cgi $(CGIEXTRAS)
+>>>>>>> 1.9.0 中文
 
 # External data I/O code and headers
 XSDC=@XSDC@

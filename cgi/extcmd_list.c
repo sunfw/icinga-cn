@@ -3,7 +3,7 @@
  * EXTCMD_LIST.C for Icinga CGIs
  *
  * Copyright (c) 1999-2009 Ethan Galstad (egalstad@nagios.org)
- * Copyright (c) 2009-2012 Icinga Development Team (http://www.icinga.org)
+ * Copyright (c) 2009-2013 Icinga Development Team (http://www.icinga.org)
  *
  * License:
  *
@@ -243,8 +243,8 @@ int main(int argc, char **argv) {
 			printf("%s没有处理\n", extcmd_get_name(i));
 		}
 	}
-	printf("%d的%d命令没有处理\n", ARRAY_SIZE(in_core_commands)),
-	       no_handler;
+	printf("%d的%d命令没有处理\n", ARRAY_SIZE(in_core_commands),
+	       no_handler);
 
 	return 0;
 }
