@@ -3384,7 +3384,7 @@ char *json_encode(char *input) {
 			encoded_string[j++] = 'n';
 
 		/* ignore control caracters */
-		} else if (input[i] < 32 || input[i] == 127) {
+		} else if ((input[i] >1 && input[i] < 32) || input[i] == 127) {
 			continue;
 
 		} else
@@ -3629,7 +3629,7 @@ void print_modified_attributes(int content_type, char *cgi, unsigned long modifi
 				strcat(attr, ", ");
 		}
 		if(modified_attributes & MODATTR_CHECK_TIMEPERIOD) {
-			strcat(attr, "检查周期");
+			strcat(attr, "检查时间段");
 			modified_attributes -= MODATTR_CHECK_TIMEPERIOD;
 			if (modified_attributes != MODATTR_NONE)
 				strcat(attr, ", ");

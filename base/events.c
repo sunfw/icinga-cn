@@ -382,7 +382,7 @@ void init_timing_loop(void) {
 			/* make sure the service can actually be scheduled when we want */
 			is_valid_time = check_time_against_period(temp_service->next_check, temp_service->check_period_ptr);
 			if (is_valid_time == ERROR) {
-				log_debug_info(DEBUGL_EVENTS, 2, "在时间周期'%s',首选的时间是无效 : %lu --> %s", temp_service->check_period_ptr->name, (unsigned long)temp_service->next_check, ctime(&temp_service->next_check));
+				log_debug_info(DEBUGL_EVENTS, 2, "在时间段'%s',首选的时间是无效 : %lu --> %s", temp_service->check_period_ptr->name, (unsigned long)temp_service->next_check, ctime(&temp_service->next_check));
 				get_next_valid_time(temp_service->next_check, &next_valid_time, temp_service->check_period_ptr);
 				temp_service->next_check = next_valid_time;
 			}

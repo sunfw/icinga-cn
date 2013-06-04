@@ -2434,7 +2434,7 @@ void show_service_detail(void) {
 				grab_host_macros_r(mac, temp_host);
 
 				/* first, we color it as maintenance if that is preferred */
-				 if (suppress_maintenance_downtime == TRUE && temp_hoststatus->scheduled_downtime_depth > 0) {
+				if (suppress_maintenance_downtime == TRUE && temp_hoststatus->scheduled_downtime_depth > 0) {
 					host_status_bg_class = "HOSTDOWNTIME";
 
 					/* otherwise we color it as its appropriate state */

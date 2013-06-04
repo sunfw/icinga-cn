@@ -289,7 +289,7 @@ int register_downtime(int type, unsigned long downtime_id) {
 	if (temp_downtime->fixed == TRUE)
 		dummy = asprintf(&temp_buffer, "安排%s固定宕机时间从%s到%s.  在这段时间内将不会发送%s通知.", type_string, start_time_string, end_time_string, type_string);
 	else
-		dummy = asprintf(&temp_buffer, "安排%s可变宕机时间从%s和%s之间开始/持续%d小时和%d分钟周期.  在这段时间内将不会发送%s通知.", type_string, start_time_string, end_time_string, hours, minutes, type_string);
+		dummy = asprintf(&temp_buffer, "安排%s可变宕机时间从%s和%s之间开始/持续%d小时和%d分钟时间段.  在这段时间内将不会发送%s通知.", type_string, start_time_string, end_time_string, hours, minutes, type_string);
 
 
 	log_debug_info(DEBUGL_DOWNTIME, 0, "安排宕机详情:\n");
@@ -515,7 +515,7 @@ int handle_scheduled_downtime(scheduled_downtime *temp_downtime) {
 				/* set the trigger time, needed to detect the end of a flexible downtime */
 				temp_downtime->trigger_time = current_time;
 
-				log_debug_info(DEBUGL_DOWNTIME, 0, "在(triggertime=%lu)时主机'%s'已进入安排宕机周期(id=%lu).\n", temp_downtime->trigger_time, hst->name, temp_downtime->downtime_id);
+				log_debug_info(DEBUGL_DOWNTIME, 0, "在(triggertime=%lu)时主机'%s'已进入安排宕机时间段(id=%lu).\n", temp_downtime->trigger_time, hst->name, temp_downtime->downtime_id);
 
 				/* log a notice - this one is parsed by the history CGI */
 				logit(NSLOG_INFO_MESSAGE, FALSE, "主机宕机警告: %s;开始; 主机已进入安排宕机时段", hst->name);
@@ -529,10 +529,10 @@ int handle_scheduled_downtime(scheduled_downtime *temp_downtime) {
 				/* set the trigger time, needed to detect the end of a flexible downtime */
 				temp_downtime->trigger_time = current_time;
 
-				log_debug_info(DEBUGL_DOWNTIME, 0, "在(triggertime=%lu)时主机'%s'上的服务'%s'已进入安排宕机周期(id=%lu).\n", temp_downtime->trigger_time, svc->host_name, svc->description, temp_downtime->downtime_id);
+				log_debug_info(DEBUGL_DOWNTIME, 0, "在(triggertime=%lu)时主机'%s'上的服务'%s'已进入安排宕机时间段(id=%lu).\n", temp_downtime->trigger_time, svc->host_name, svc->description, temp_downtime->downtime_id);
 
 				/* log a notice - this one is parsed by the history CGI */
-				logit(NSLOG_INFO_MESSAGE, FALSE, "服务宕机警告: %s;%s;开始; 服务已进入安排宕机周期", svc->host_name, svc->description);
+				logit(NSLOG_INFO_MESSAGE, FALSE, "服务宕机警告: %s;%s;开始; 服务已进入安排宕机时间段", svc->host_name, svc->description);
 
 				/* send a notification */
 				service_notification(svc, NOTIFICATION_DOWNTIMESTART, temp_downtime->author, temp_downtime->comment, NOTIFICATION_OPTION_NONE);

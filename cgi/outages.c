@@ -301,7 +301,7 @@ void display_network_outages(void) {
 		printf("\"中断\": [\n");
 	} else if (content_type == CSV_CONTENT) {
 		printf("%s严重性%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s数据%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s主机%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s状态%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s备注%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s状态持续时间%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);

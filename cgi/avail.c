@@ -540,7 +540,7 @@ int main(int argc, char **argv) {
 			printf("</td>\n");
 			printf("</tr>\n");
 
-			printf("<tr><td valign=top align=left class='optBoxItem'>报告周期:</td><td valign=top align=left class='optBoxItem'>存档回滚:</td></tr>\n");
+			printf("<tr><td valign=top align=left class='optBoxItem'>报告时间段:</td><td valign=top align=left class='optBoxItem'>存档回滚:</td></tr>\n");
 			printf("<tr>\n");
 			printf("<td valign=top align=left class='optBoxItem'>\n");
 			printf("<select name='timeperiod'>\n");
@@ -610,7 +610,7 @@ int main(int argc, char **argv) {
 		printf("<table border=0 cellpadding=5 align='center'>\n");
 
 		printf("<tr>");
-		printf("<td valign=top class='reportSelectSubTitle'>报告周期:</td>\n");
+		printf("<td valign=top class='reportSelectSubTitle'>报告时间段:</td>\n");
 		printf("<td valign=top align=left class='optBoxItem'>\n");
 		printf("<select name='timeperiod'>\n");
 		printf("<option value=today>今天\n");
@@ -624,12 +624,12 @@ int main(int argc, char **argv) {
 		printf("<option value=lastmonth>最近一月\n");
 		printf("<option value=thisyear>今年\n");
 		printf("<option value=lastyear>去年\n");
-		printf("<option value=custom>* 自定义报告周期 *\n");
+		printf("<option value=custom>* 自定义报告时间段 *\n");
 		printf("</select>\n");
 		printf("</td>\n");
 		printf("</tr>\n");
 
-		printf("<tr><td valign=top class='reportSelectSubTitle'>如果自定义报告周期...</td></tr>\n");
+		printf("<tr><td valign=top class='reportSelectSubTitle'>如果自定义报告时间段...</td></tr>\n");
 
 		printf("<tr>");
 		printf("<td valign=top class='reportSelectSubTitle'>开始日期(含):</td>\n");
@@ -684,7 +684,7 @@ int main(int argc, char **argv) {
 		printf("<tr><td colspan=2><br></td></tr>\n");
 
 		printf("<tr>");
-		printf("<td valign=top class='reportSelectSubTitle'>报告时间周期:</td>\n");
+		printf("<td valign=top class='reportSelectSubTitle'>报告时间段:</td>\n");
 		printf("<td valign=top align=left class='optBoxItem'>\n");
 		printf("<select name='rpttimeperiod'>\n");
 		printf("<option value=\"\">无\n");

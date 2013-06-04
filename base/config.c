@@ -252,7 +252,7 @@ int read_all_object_data(char *main_config_file) {
 	options = READ_ALL_OBJECT_DATA;
 
 	/* cache object definitions if we're up and running */
-	if (verify_config && test_scheduling == FALSE)
+	if (verify_config == FALSE && test_scheduling == FALSE)
 		cache = TRUE;
 
 	/* precache object definitions */
@@ -2774,7 +2774,7 @@ int pre_flight_object_check(int *w, int *e) {
 	/* check all timeperiods...              */
 	/*****************************************/
 	if (verify_config)
-		printf("检查时间周期...\n");
+		printf("检查时间段...\n");
 
 	for (temp_timeperiod = timeperiod_list, total_objects = 0; temp_timeperiod != NULL; temp_timeperiod = temp_timeperiod->next, total_objects++) {
 
@@ -2801,7 +2801,7 @@ int pre_flight_object_check(int *w, int *e) {
 	}
 
 	if (verify_config)
-		printf("\t已检查%d时间周期.\n", total_objects);
+		printf("\t已检查%d时间段.\n", total_objects);
 
 
 	/*****************************************/

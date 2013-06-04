@@ -906,7 +906,7 @@ void show_filter(void) {
 	printf("<td nowrap><input type=radio name='order' value='new2old' %s> 较新的首个条目&nbsp;&nbsp;| <input type=radio name='order' value='old2new' %s> 较旧的首个条目</td></tr>", (reverse == TRUE) ? "" : "checked", (reverse == TRUE) ? "checked" : "");
 
 	/* Timeperiod */
-	printf("<tr><td align=left>时间周期:</td>");
+	printf("<tr><td align=left>时间段:</td>");
 	printf("<td align=left>");
 
 	printf("<select id='selecttp' name='timeperiod' onChange=\"var i=document.getElementById('selecttp').selectedIndex; if (document.getElementById('selecttp').options[i].value == 'custom') { document.getElementById('custtime').style.display = ''; } else { document.getElementById('custtime').style.display = 'none';}\">\n");
@@ -921,7 +921,7 @@ void show_filter(void) {
 	printf("<option value=lastmonth %s>上月\n", (timeperiod_type == TIMEPERIOD_LASTMONTH) ? "selected" : "");
 	printf("<option value=thisyear %s>本年\n", (timeperiod_type == TIMEPERIOD_THISYEAR) ? "selected" : "");
 	printf("<option value=lastyear %s>上年\n", (timeperiod_type == TIMEPERIOD_LASTYEAR) ? "selected" : "");
-	printf("<option value=custom %s>* 自定义周期 *\n", (timeperiod_type == TIMEPERIOD_CUSTOM) ? "selected" : "");
+	printf("<option value=custom %s>* 自定义时间段 *\n", (timeperiod_type == TIMEPERIOD_CUSTOM) ? "selected" : "");
 	printf("</select>\n");
 	printf("<div id='custtime' style='display:%s;'>", (timeperiod_type == TIMEPERIOD_CUSTOM) ? "" : "none");
 

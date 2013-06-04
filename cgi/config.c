@@ -372,7 +372,7 @@ int main(void) {
 		else if (display_type == DISPLAY_CONTACTS)		printf("联系人");
 		else if (display_type == DISPLAY_CONTACTGROUPS)		printf("联系人组");
 		else if (display_type == DISPLAY_SERVICES)		printf("服务");
-		else if (display_type == DISPLAY_TIMEPERIODS)		printf("周期");
+		else if (display_type == DISPLAY_TIMEPERIODS)		printf("时间段");
 		else if (display_type == DISPLAY_COMMANDS)		printf("命令");
 		else if (display_type == DISPLAY_SERVICEDEPENDENCIES)	printf("服务依赖关系");
 		else if (display_type == DISPLAY_SERVICEESCALATIONS)	printf("服务增强");
@@ -776,7 +776,7 @@ void display_hosts(void) {
 		printf("%s检查间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s重试间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s主机检查命令%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s检查周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s检查时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s强迫%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s启用主动检查%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s启用被动检查%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
@@ -786,7 +786,7 @@ void display_hosts(void) {
 		printf("%s通知时间间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s首次通知延迟%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s通知选项%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s通知周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s通知时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s事件处理%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s启用事件处理%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s跟踪选项%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
@@ -821,7 +821,7 @@ void display_hosts(void) {
 		printf("<TH CLASS='data'>检查间隔</TH>\n");
 		printf("<TH CLASS='data'>重试间隔</TH>\n");
 		printf("<TH CLASS='data'>主机检查命令</TH>");
-		printf("<TH CLASS='data'>检查周期</TH>");
+		printf("<TH CLASS='data'>检查时间段</TH>");
 		printf("<TH CLASS='data'>强迫</TH>\n");
 		printf("<TH CLASS='data'>启用主动检查</TH>\n");
 		printf("<TH CLASS='data'>启用被动检查</TH>\n");
@@ -831,7 +831,7 @@ void display_hosts(void) {
 		printf("<TH CLASS='data'>通知间隔</TH>");
 		printf("<TH CLASS='data'>首次通知延迟</TH>");
 		printf("<TH CLASS='data'>通知选项</TH>");
-		printf("<TH CLASS='data'>通知周期</TH>");
+		printf("<TH CLASS='data'>通知时间段</TH>");
 		printf("<TH CLASS='data'>事件处理</TH>");
 		printf("<TH CLASS='data'>启用事件处理</TH>");
 		printf("<TH CLASS='data'>跟踪选项</TH>\n");
@@ -952,9 +952,9 @@ void display_hosts(void) {
 					printf("\"主机检查命令\": \"%s\", ", json_encode(temp_host->host_check_command));
 
 				if (temp_host->check_period == NULL)
-					printf("\"检查周期\":  null, ");
+					printf("\"检查时间段\":  null, ");
 				else
-					printf("\"检查周期\": \"%s\", ", json_encode(temp_host->check_period));
+					printf("\"检查时间段\": \"%s\", ", json_encode(temp_host->check_period));
 
 				printf("\"强迫\":  %s, ", (temp_host->obsess_over_host == TRUE) ? "true" : "false");
 				printf("\"启用主动检查\":  %s, ", (temp_host->checks_enabled == TRUE) ? "true" : "false");
@@ -1099,9 +1099,9 @@ void display_hosts(void) {
 			if (content_type == JSON_CONTENT) {
 				printf(" ], ");
 				if (temp_host->notification_period == NULL)
-					printf("\"通知周期\": null, ");
+					printf("\"通知时间段\": null, ");
 				else
-					printf("\"通知周期\": \"%s\", ", json_encode(temp_host->notification_period));
+					printf("\"通知时间段\": \"%s\", ", json_encode(temp_host->notification_period));
 
 				if (temp_host->event_handler == NULL)
 					printf("\"事件处理\": null, ");
@@ -1658,8 +1658,8 @@ void display_contacts(void) {
 		printf("%s页面地址/数量%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s服务通知选项%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s主机通知选项%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s服务通知周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s主机通知周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s服务通知时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s主机通知时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s服务通知命令%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s主机通知命令%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s保留选项%s",csv_data_enclosure,csv_data_enclosure);
@@ -1673,8 +1673,8 @@ void display_contacts(void) {
 		printf("<TH CLASS='data'>页面地址/数量</TH>");
 		printf("<TH CLASS='data'>服务通知选项</TH>");
 		printf("<TH CLASS='data'>主机通知选项</TH>");
-		printf("<TH CLASS='data'>服务通知周期</TH>");
-		printf("<TH CLASS='data'>主机通知周期</TH>");
+		printf("<TH CLASS='data'>服务通知时间段</TH>");
+		printf("<TH CLASS='data'>主机通知时间段</TH>");
 		printf("<TH CLASS='data'>服务通知命令</TH>");
 		printf("<TH CLASS='data'>主机通知命令</TH>");
 		printf("<TH CLASS='data'>保留选项</TH>");
@@ -1812,13 +1812,13 @@ void display_contacts(void) {
 			if (content_type == JSON_CONTENT) {
 				printf(" ], ");
 				if (temp_contact->service_notification_period == NULL)
-					printf("\"服务通知周期\": null, ");
+					printf("\"服务通知时间段\": null, ");
 				else
-					printf("\"服务通知周期\": \"%s\", ", json_encode(temp_contact->service_notification_period));
+					printf("\"服务通知时间段\": \"%s\", ", json_encode(temp_contact->service_notification_period));
 				if (temp_contact->host_notification_period == NULL)
-					printf("\"主机通知周期\": null, ");
+					printf("\"主机通知时间段\": null, ");
 				else
-					printf("\"主机通知周期\": \"%s\", ", json_encode(temp_contact->host_notification_period));
+					printf("\"主机通知时间段\": \"%s\", ", json_encode(temp_contact->host_notification_period));
 				printf("\"服务通知命令\": [ ");
 			} else if (content_type == CSV_CONTENT) {
 				printf("%s%s", csv_data_enclosure, csv_delimiter);
@@ -2069,7 +2069,7 @@ void display_services(void) {
 		printf("%s常规检查间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s重试间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s检查命令%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s检查周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s检查时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s并行%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s可变的%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s强迫%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
@@ -2082,7 +2082,7 @@ void display_services(void) {
 		printf("%s通知间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s首次通知延迟%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s通知选项%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s通知周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s通知时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s事件处理%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s启用事件处理%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s跟踪选项%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
@@ -2110,7 +2110,7 @@ void display_services(void) {
 		printf("<TH CLASS='data'>常规检查间隔</TH>\n");
 		printf("<TH CLASS='data'>重试间隔</TH>\n");
 		printf("<TH CLASS='data'>检查命令</TH>\n");
-		printf("<TH CLASS='data'>检查周期</TH>\n");
+		printf("<TH CLASS='data'>检查时间段</TH>\n");
 		printf("<TH CLASS='data'>并行</TH>\n");
 		printf("<TH CLASS='data'>可变的</TH>\n");
 		printf("<TH CLASS='data'>强迫</TH>\n");
@@ -2123,7 +2123,7 @@ void display_services(void) {
 		printf("<TH CLASS='data'>通知间隔</TH>\n");
 		printf("<TH CLASS='data'>首次通知延迟</TH>\n");
 		printf("<TH CLASS='data'>通知选项</TH>\n");
-		printf("<TH CLASS='data'>通知周期</TH>\n");
+		printf("<TH CLASS='data'>通知时间段</TH>\n");
 		printf("<TH CLASS='data'>事件处理</TH>");
 		printf("<TH CLASS='data'>启用事件处理</TH>");
 		printf("<TH CLASS='data'>跟踪选项</TH>\n");
@@ -2199,9 +2199,9 @@ void display_services(void) {
 			printf("\"重试间隔\": \"%s\", ", time_string[1]);
 			printf("\"检查命令\": \"%s\", ", json_encode(command_line));
 			if (temp_service->check_period == NULL)
-				printf("\"检查周期\": null, ");
+				printf("\"检查时间段\": null, ");
 			else
-				printf("\"检查周期\": \"%s\", ", json_encode(temp_service->check_period));
+				printf("\"检查时间段\": \"%s\", ", json_encode(temp_service->check_period));
 
 				printf("\"并行\": %s, ", (temp_service->parallelize == TRUE) ? "true" : "false");
 				printf("\"可变的\": %s, ", (temp_service->is_volatile == TRUE) ? "true" : "false");
@@ -2380,9 +2380,9 @@ void display_services(void) {
 			if (content_type == JSON_CONTENT) {
 				printf(" ], ");
 				if (temp_service->notification_period == NULL)
-					printf("\"通知周期\": null, ");
+					printf("\"通知时间段\": null, ");
 				else
-					printf("\"通知周期\": \"%s\", ", json_encode(temp_service->notification_period));
+					printf("\"通知时间段\": \"%s\", ", json_encode(temp_service->notification_period));
 
 				if (temp_service->event_handler == NULL)
 					printf("\"事件处理\": null, ");
@@ -3021,7 +3021,7 @@ void display_servicedependencies(void) {
 		printf("%s主要主机%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s主要服务%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s依赖类型%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s依赖周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s依赖时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s依赖失败选项%s\n",csv_data_enclosure,csv_data_enclosure);
 	} else {
 		printf("<TABLE BORDER=0 CLASS='data'>\n");
@@ -3035,7 +3035,7 @@ void display_servicedependencies(void) {
 		printf("<TH CLASS='data'>主机</TH>");
 		printf("<TH CLASS='data'>服务</TH>");
 		printf("<TH CLASS='data'>依赖类型</TH>");
-		printf("<TH CLASS='data'>依赖周期</TH>");
+		printf("<TH CLASS='data'>依赖时间段</TH>");
 		printf("<TH CLASS='data'>依赖失败选项</TH>");
 		printf("</TR>\n");
 	}
@@ -3086,9 +3086,9 @@ void display_servicedependencies(void) {
 				printf("\"依赖类型\": \"%s\", ", (temp_sd->dependency_type == NOTIFICATION_DEPENDENCY) ? "通知" : "检查执行");
 
 				if (temp_sd->dependency_period == NULL)
-					printf("\"依赖周期\": null, ");
+					printf("\"依赖时间段\": null, ");
 				else
-					printf("\"依赖周期\": \"%s\", ", json_encode(temp_sd->dependency_period));
+					printf("\"依赖时间段\": \"%s\", ", json_encode(temp_sd->dependency_period));
 
 				printf("\"依赖失败选项\": [");
 				/* print list in csv format */
@@ -3186,7 +3186,7 @@ void display_serviceescalations(void) {
 		printf("%s首次通知%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s最后通知%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s通知间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s增强周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s增强时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s增强选项%s\n",csv_data_enclosure,csv_data_enclosure);
 	} else {
 		printf("<TABLE BORDER=0 CLASS='data'>\n");
@@ -3197,7 +3197,7 @@ void display_serviceescalations(void) {
 		printf("<TH CLASS='data'>首次通知</TH>");
 		printf("<TH CLASS='data'>最后通知</TH>");
 		printf("<TH CLASS='data'>通知间隔</TH>");
-		printf("<TH CLASS='data'>增强周期</TH>");
+		printf("<TH CLASS='data'>增强时间段</TH>");
 		printf("<TH CLASS='data'>增强选项</TH>");
 		printf("</TR>\n");
 	}
@@ -3346,9 +3346,9 @@ void display_serviceescalations(void) {
 			if (content_type == JSON_CONTENT) {
 				printf("\"通知间隔\": \"%s\", ", (temp_se->notification_interval == 0.0) ? "一次性通知(不重复通知)" : time_string);
 				if (temp_se->escalation_period == NULL)
-					printf("\"增强周期\": null, ");
+					printf("\"增强时间段\": null, ");
 				else
-					printf("\"增强周期\": \"%s\", ", json_encode(temp_se->escalation_period));
+					printf("\"增强时间段\": \"%s\", ", json_encode(temp_se->escalation_period));
 				printf("\"增强选项\": [ ");
 			} else if (content_type == CSV_CONTENT) {
 				printf("%s%s", csv_data_enclosure, csv_delimiter);
@@ -3424,7 +3424,7 @@ void display_hostdependencies(void) {
 		printf("%s依赖主机%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 		printf("%s主要主机%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 		printf("%s依赖类型%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
-		printf("%s依赖周期%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
+		printf("%s依赖时间段%s%s", csv_data_enclosure, csv_data_enclosure, csv_delimiter);
 		printf("%s依赖失败选项%s\n", csv_data_enclosure, csv_data_enclosure);
 	} else {
 		printf("<TABLE BORDER=0 CLASS='data'>\n");
@@ -3432,7 +3432,7 @@ void display_hostdependencies(void) {
 		printf("<TH CLASS='data'>依赖主机</TH>");
 		printf("<TH CLASS='data'>主要主机</TH>");
 		printf("<TH CLASS='data'>依赖类型</TH>");
-		printf("<TH CLASS='data'>依赖周期</TH>");
+		printf("<TH CLASS='data'>依赖时间段</TH>");
 		printf("<TH CLASS='data'>依赖失败选项</TH>");
 		printf("</TR>\n");
 	}
@@ -3474,9 +3474,9 @@ void display_hostdependencies(void) {
 				printf("\"依赖类型\": \"%s\", ", (temp_hd->dependency_type == NOTIFICATION_DEPENDENCY) ? "通知" : "检查执行");
 
 				if (temp_hd->dependency_period == NULL)
-					printf("\"依赖周期\": null, ");
+					printf("\"依赖时间段\": null, ");
 				else
-					printf("\"依赖周期\": \"%s\", ", json_encode(temp_hd->dependency_period));
+					printf("\"依赖时间段\": \"%s\", ", json_encode(temp_hd->dependency_period));
 
 				printf("\"依赖失败选项\": [");
 				/* print list in csv format */
@@ -3561,7 +3561,7 @@ void display_hostescalations(void) {
 		printf("%s首次通知%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s最后通知%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s通知间隔%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
-		printf("%s增强周期%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
+		printf("%s增强时间段%s%s",csv_data_enclosure,csv_data_enclosure,csv_delimiter);
 		printf("%s增强选项%s\n",csv_data_enclosure,csv_data_enclosure);
 	} else {
 		printf("<TABLE BORDER=0 CLASS='data'>\n");
@@ -3571,7 +3571,7 @@ void display_hostescalations(void) {
 		printf("<TH CLASS='data'>首次通知</TH>");
 		printf("<TH CLASS='data'>最后通知</TH>");
 		printf("<TH CLASS='data'>通知间隔</TH>");
-		printf("<TH CLASS='data'>增强周期</TH>");
+		printf("<TH CLASS='data'>增强时间段</TH>");
 		printf("<TH CLASS='data'>增强选项</TH>");
 		printf("</TR>\n");
 	}
@@ -3701,9 +3701,9 @@ void display_hostescalations(void) {
 			if (content_type == JSON_CONTENT) {
 				printf("\"通知间隔\": \"%s\", ", (temp_he->notification_interval == 0.0) ? "一次性通知(不重复通知)" : time_string);
 				if (temp_he->escalation_period == NULL)
-					printf("\"增强周期\": null, ");
+					printf("\"增强时间段\": null, ");
 				else
-					printf("\"增强周期\": \"%s\", ", json_encode(temp_he->escalation_period));
+					printf("\"增强时间段\": \"%s\", ", json_encode(temp_he->escalation_period));
 				printf("\"增强选项\": [ ");
 			} else if (content_type == CSV_CONTENT) {
 				printf("%s%s", csv_data_enclosure, csv_delimiter);

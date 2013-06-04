@@ -415,7 +415,7 @@ int main(int argc, char **argv) {
 		printf("<option value=%d>25个最新硬件状态警告\n", SREPORT_RECENT_ALERTS);
 		printf("<option value=%d>25个最新硬件状态主机警告\n", SREPORT_RECENT_HOST_ALERTS);
 		printf("<option value=%d>25个最新硬件状态服务警告\n", SREPORT_RECENT_SERVICE_ALERTS);
-		printf("<option value=%d>前25个硬件状态主机警告排名s\n", SREPORT_TOP_HOST_ALERTS);
+		printf("<option value=%d>前25个硬件状态主机警告排名\n", SREPORT_TOP_HOST_ALERTS);
 		printf("<option value=%d>前25个硬件状态服务警告排名\n", SREPORT_TOP_SERVICE_ALERTS);
 		printf("</select>\n");
 		printf("</td></tr>\n");
@@ -449,7 +449,7 @@ int main(int argc, char **argv) {
 		printf("</td></tr>\n");
 
 		printf("<tr>");
-		printf("<td valign=top class='reportSelectSubTitle'>报告周期:</td>\n");
+		printf("<td valign=top class='reportSelectSubTitle'>报告时间段:</td>\n");
 		printf("<td valign=top align=left class='optBoxItem'>\n");
 		printf("<select name='timeperiod'>\n");
 		printf("<option value=today>今天\n");
@@ -468,7 +468,7 @@ int main(int argc, char **argv) {
 		printf("</td>\n");
 		printf("</tr>\n");
 
-		printf("<tr><td valign=top class='reportSelectSubTitle'>如果自定义报告周期...</td></tr>\n");
+		printf("<tr><td valign=top class='reportSelectSubTitle'>如果自定义报告时间段...</td></tr>\n");
 
 		printf("<tr>");
 		printf("<td valign=top class='reportSelectSubTitle'>开始时间(含):</td>\n");
@@ -590,7 +590,7 @@ int main(int argc, char **argv) {
 		printf("<option value=%d>服务正常状态\n", AE_SERVICE_OK);
 		printf("<option value=%d>服务警报状态\n", AE_SERVICE_WARNING);
 		printf("<option value=%d>服务未知状态\n", AE_SERVICE_UNKNOWN);
-		printf("<option value=%d>服务严重状态\n", AE_SERVICE_CRITICAL);
+		printf("<option value=%d>服务紧急状态\n", AE_SERVICE_CRITICAL);
 		printf("</select>\n");
 		printf("</td></tr>\n");
 
