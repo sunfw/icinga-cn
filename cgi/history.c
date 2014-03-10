@@ -756,7 +756,7 @@ void show_history(void) {
 				else if (temp_entry->type == LOGENTRY_SERVICE_DOWNTIME_STOPPED)
 					strcpy(image_alt, "退出安排服务宕机时段");
 				else if (temp_entry->type == LOGENTRY_SERVICE_DOWNTIME_CANCELLED)
-					strcpy(image_alt, "已取消安排服务宕机");
+					strcpy(image_alt, "取消安排服务宕机");
 
 				break;
 
@@ -846,7 +846,7 @@ void show_history(void) {
 				else if (temp_entry->type == LOGENTRY_HOST_DOWNTIME_STOPPED)
 					strcpy(image_alt, "退出安排主机宕机时段");
 				else if (temp_entry->type == LOGENTRY_HOST_DOWNTIME_CANCELLED)
-					strcpy(image_alt, "已取消安排主机宕机");
+					strcpy(image_alt, "取消安排主机宕机");
 
 				break;
 

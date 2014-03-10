@@ -2491,9 +2491,9 @@ ac_config_headers="$ac_config_headers include/config.h"
 
 
 PKG_NAME=icinga-core
-PKG_VERSION="1.9.1"
+PKG_VERSION="1.9.5"
 PKG_HOME_URL="http://www.icinga.org/"
-PKG_REL_DATE="05-22-2013"
+PKG_REL_DATE="02-11-2014"
 
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
@@ -5358,7 +5358,7 @@ fi
 
 fi
 if test x$MAIL_PROG = x; then
-	MAIL_PROG="/bin/mail"
+	MAIL_PROG="/usr/bin/mutt"
 fi
 
 
@@ -8471,7 +8471,6 @@ perl subst $srcdir/sample-config/template-object/switch.cfg
 echo ""
 echo "Creating sample config files in module/idoutils/config/ ..."
 
-perl subst $srcdir/module/idoutils/config/icinga.cfg
 perl subst $srcdir/module/idoutils/config/idoutils.cfg-sample
 perl subst $srcdir/module/idoutils/config/ido2db.cfg
 perl subst $srcdir/module/idoutils/config/idomod.cfg

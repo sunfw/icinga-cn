@@ -416,10 +416,8 @@ int process_cgivars(void) {
 	for (x = 0; variables[x] != NULL; x++) {
 
 		/* do some basic length checking on the variable identifier to prevent buffer overflows */
-		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) {
-			x++;
+		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1)
 			continue;
-		}
 
 		/* we found the command type */
 		else if (!strcmp(variables[x], "cmd_typ")) {
@@ -2638,14 +2636,14 @@ static int cmd_submitf(int id, const char *fmt, ...) {
 
 	len = snprintf(cmd, sizeof(cmd) - 1, "[%lu] %s;", time(NULL), command);
 
-	if (len < 0)
+	if (len < 0 || len >= sizeof(cmd))
 		return ERROR;
 
 	if (fmt) {
 		va_start(ap, fmt);
 		len2 = vsnprintf(&cmd[len], sizeof(cmd) - len - 1, fmt, ap);
 		va_end(ap);
-		if (len2 < 0)
+		if (len2 < 0 || len2 >= sizeof(cmd) - len)
 			return ERROR;
 	}
 

@@ -344,7 +344,7 @@ void display_index(void) {
 
 	printf("<b><anchor title='所有故障'>所有故障<go href='%s'><postfield name='style' value='aprobs'/></go></anchor></b><br/>\n", STATUSWML_CGI);
 
-	printf("<b><anchor title='未处理的故障'>未处理的故障s<go href='%s'><postfield name='style' value='uprobs'/></go></anchor></b><br/>\n", STATUSWML_CGI);
+	printf("<b><anchor title='未处理的故障'>未处理的故障<go href='%s'><postfield name='style' value='uprobs'/></go></anchor></b><br/>\n", STATUSWML_CGI);
 
 	printf("<b><anchor title='进程信息'>进程信息<go href='%s'><postfield name='style' value='processinfo'/></go></anchor></b><br/>\n", STATUSWML_CGI);
 
@@ -672,10 +672,10 @@ void display_hostgroup_summary(void) {
 
 
 	/**** MAIN SCREEN (CARD 1) ****/
-	printf("<card id='card1' title='状态汇总'>\n");
+	printf("<card id='card1' title='状态摘要'>\n");
 	printf("<p align='center' mode='nowrap'>\n");
 
-	printf("<b><anchor title='状态汇总'>状态汇总<go href='%s' method='post'><postfield name='hostgroup' value='%s'/><postfield name='style' value='overview'/></go></anchor></b><br/><br/>\n", STATUSWML_CGI, escape_string(hostgroup_name));
+	printf("<b><anchor title='状态摘要'>状态摘要<go href='%s' method='post'><postfield name='hostgroup' value='%s'/><postfield name='style' value='overview'/></go></anchor></b><br/><br/>\n", STATUSWML_CGI, escape_string(hostgroup_name));
 
 	/* check all hostgroups */
 	for (temp_hostgroup = hostgroup_list; temp_hostgroup != NULL; temp_hostgroup = temp_hostgroup->next) {
@@ -1354,9 +1354,9 @@ void display_problems(void) {
 	int total_service_problems = 0;
 
 	/**** MAIN SCREEN (CARD 1) ****/
-	printf("<card id='card1' title='%s 故障'>\n", (display_type == DISPLAY_ALL_PROBLEMS) ? "所有" : "未处理");
+	printf("<card id='card1' title='%s故障'>\n", (display_type == DISPLAY_ALL_PROBLEMS) ? "所有" : "未处理");
 	printf("<p align='center' mode='nowrap'>\n");
-	printf("<b>%s 故障</b><br/><br/>\n", (display_type == DISPLAY_ALL_PROBLEMS) ? "所有" : "未处理");
+	printf("<b>%s故障</b><br/><br/>\n", (display_type == DISPLAY_ALL_PROBLEMS) ? "所有" : "未处理");
 
 	printf("<b>主机故障:</b>\n");
 

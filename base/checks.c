@@ -3627,8 +3627,6 @@ int handle_async_host_check_result_3x(host *temp_host, check_result *queued_chec
 	}
 
 	/* translate return code to basic UP/DOWN state - the DOWN/UNREACHABLE state determination is made later */
-	/* NOTE: only do this for active checks - passive check results already have the final state */
-	if (queued_check_result->check_type == HOST_CHECK_ACTIVE) {
 
 		/* if we're not doing aggressive host checking, let WARNING states indicate the host is up (fake the result to be STATE_OK) */
 		if (use_aggressive_host_checking == FALSE && result == STATE_WARNING)
@@ -3641,7 +3639,6 @@ int handle_async_host_check_result_3x(host *temp_host, check_result *queued_chec
 		/* any problem state indicates the host is not UP */
 		else
 			result = HOST_DOWN;
-	}
 
 
 	/******************* PROCESS THE CHECK RESULTS ******************/

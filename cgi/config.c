@@ -2529,9 +2529,9 @@ void display_services(void) {
 				else
 					printf("\"备注\": \"%s\", ", json_encode(temp_service->notes));
 				if (temp_service->notes_url == NULL)
-					printf("\"备注 URL\": null, ");
+					printf("\"备注URL\": null, ");
 				else
-					printf("\"notes备注 URL_url\": \"%s\", ", json_encode(temp_service->notes_url));
+					printf("\"备注URL\": \"%s\", ", json_encode(temp_service->notes_url));
 				if (temp_service->action_url == NULL)
 					printf("\"动作 URL\": null, ");
 				else
@@ -2942,7 +2942,7 @@ void display_commands(void) {
 		printf("\n");
 	} else {
 		printf("<TABLE BORDER=0 CLASS='data'>\n");
-		printf("<TR><TH CLASS='data'>命令名称e</TH><TH CLASS='data'>命令行</TH></TR>\n");
+		printf("<TR><TH CLASS='data'>命令名称</TH><TH CLASS='data'>命令行</TH></TR>\n");
 	}
 
 	/* check all commands */
@@ -4263,6 +4263,9 @@ void display_command_expansion(void) {
 				for (c = commandline; c && (cc = strstr(c, "$"));) {
 					(*(cc++)) = '\0';
 					printf("%s", html_encode(c, FALSE));
+					if (strlen(commandline_pre_processed) + strlen(c) + 1 > MAX_COMMAND_BUFFER) 
+						return;
+
 					strcat(commandline_pre_processed, c);
 					if ((*cc) == '$') {
 						/* Escaped '$' */
@@ -4273,8 +4276,12 @@ void display_command_expansion(void) {
 						c = strstr(cc, "$");
 						if (c)(*(c++)) = '\0';
 						printf("<FONT COLOR='#777777'>$%s%s</FONT>", html_encode(cc, FALSE), (c ? "$" : ""));
+                        if (strlen(commandline_pre_processed) + strlen(cc) + 3 > MAX_COMMAND_BUFFER) 
+                        	return;
+
                         strcat(commandline_pre_processed,"$");
 						strcat(commandline_pre_processed,cc);
+
 						if (c) strcat(commandline_pre_processed,"$");
 						if (!c) printf("<FONT COLOR='#FF0000'> (未正确终止)</FONT>");
 					} else {
@@ -4288,8 +4295,10 @@ void display_command_expansion(void) {
 								if (command_args[i]) {
 									if (*(command_args[i]) != '\0') {
 										printf("<FONT COLOR='%s'><B>%s%s%s</B></FONT>",
-											hash_color(i), ((lead_space[i] > 0) || (trail_space[i] > 0) ? "<U>&zwj;" : ""),
-											escape_string(command_args[i]), ((lead_space[i] > 0) || (trail_space[i] > 0) ? "&zwj;</U>" : ""));
+										hash_color(i), ((lead_space[i] > 0) || (trail_space[i] > 0) ? "<u>&zwj;" : ""),
+										escape_string(command_args[i]), ((lead_space[i] > 0) || (trail_space[i] > 0) ? "&zwj;</u>" : ""));
+										if (strlen(commandline_pre_processed) + strlen(command_args[i]) + 1 > MAX_COMMAND_BUFFER)
+										      return;
 										strcat(commandline_pre_processed,command_args[i]);
                                         } else printf("<FONT COLOR='#0000FF'>(空)</FONT>");
                                     } else printf("<FONT COLOR='#0000FF'>(未指定)</FONT>");
@@ -4306,6 +4315,8 @@ void display_command_expansion(void) {
 				}
 				if (c) {
 					printf("%s", html_encode(c, FALSE));
+					if (strlen(commandline_pre_processed) + strlen(c) + 1 > MAX_COMMAND_BUFFER) 
+						return;
 					strcat(commandline_pre_processed, c);
 				}
 				commandline_pre_processed[MAX_COMMAND_BUFFER - 1] = '\0';

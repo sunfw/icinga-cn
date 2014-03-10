@@ -23,6 +23,7 @@ ScriptAlias @cgiurl@ "@sbindir@"
 </Directory>
 
 Alias @htmurl@ "@datadir@/"
+
 <Directory "@datadir@/">
 #  SSLRequireSSL
    Options None
@@ -36,19 +37,5 @@ Alias @htmurl@ "@datadir@/"
    AuthType Basic
    AuthUserFile @HTTPAUTHFILE@
    Require valid-user
-   <IfModule mod_rewrite.c>
-		# Turn on URL rewriting
-		RewriteEngine On
-		Options symLinksIfOwnerMatch
-		# Installation directory
-		RewriteBase @htmurl@
-		# Protect application and system files from being viewed
-		RewriteRule "^(?:application|modules|system)/" - [F]
-		# Allow any files or directories that exist to be displayed directly
-		RewriteCond "%{REQUEST_FILENAME}" !-f
-		RewriteCond "%{REQUEST_FILENAME}" !-d
-		# Rewrite all other URLs to index.php/URL
-		RewriteRule .* pnp4icinga.php/$0 [PT,L]
-	</IfModule>
 </Directory>
 

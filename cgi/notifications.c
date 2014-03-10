@@ -312,7 +312,7 @@ int main(void) {
 		printf("<option value=thismonth %s>本月\n", (timeperiod_type == TIMEPERIOD_THISMONTH) ? "selected" : "");
 		printf("<option value=last31days %s>最近31天\n", (timeperiod_type == TIMEPERIOD_LAST31DAYS) ? "selected" : "");
 		printf("<option value=lastmonth %s>上月\n", (timeperiod_type == TIMEPERIOD_LASTMONTH) ? "selected" : "");
-		printf("<option value=thisyear %s>本年\n", (timeperiod_type == TIMEPERIOD_THISYEAR) ? "selected" : "");
+		printf("<option value=thisyear %s>今年\n", (timeperiod_type == TIMEPERIOD_THISYEAR) ? "selected" : "");
 		printf("<option value=lastyear %s>上年\n", (timeperiod_type == TIMEPERIOD_LASTYEAR) ? "selected" : "");
 		printf("<option value=custom %s>* 自定义时间段 *\n", (timeperiod_type == TIMEPERIOD_CUSTOM) ? "selected" : "");
 		printf("</select>\n");
@@ -362,10 +362,8 @@ int process_cgivars(void) {
 	for (x = 0; variables[x] != NULL; x++) {
 
 		/* do some basic length checking on the variable identifier to prevent buffer overflows */
-		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) {
-			x++;
+		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1)
 			continue;
-		}
 
 		/* we found the host argument */
 		else if (!strcmp(variables[x], "host")) {

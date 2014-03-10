@@ -1698,7 +1698,7 @@ void display_tac_overview(void) {
 		printf("\"被动服务未知\": %d,\n", services_unknown_passive);
 		printf("\"被动主机宕机服务未知\": %d,\n", services_unknown_passive_host_down);
 		printf("\"禁用服务未知\": %d,\n", services_unknown_disabled);
-		printf("\" 禁用主机宕机服务未知\": %d,\n", services_unknown_disabled_host_down);
+		printf("\"禁用主机宕机服务未知\": %d,\n", services_unknown_disabled_host_down);
 
 		printf("\"安排服务未知\": %d,\n", services_unknown_scheduled);
 		printf("\"安排主机宕机服务未知\": %d,\n", services_unknown_scheduled_host_down);
@@ -1973,7 +1973,7 @@ void display_tac_overview(void) {
 	printf("</tr>\n");
 	printf("<tr>\n");
 	printf("<td align=left valign=center class='healthItem'>服务健康:</td>");
-	printf("<td valign=top width=100 class='healthBar'><a href='%s?host=all&style=detail&servicestatustypes=%d'><img src='%s%s' border=0 width=%d height=20 alt='%2.1f%% 健康' title='%2.1f%% 健康'></td>\n", STATUS_CGI, SERVICE_CRITICAL | SERVICE_WARNING | SERVICE_PENDING, url_images_path, service_health_image, (percent_service_health < 5.0) ? 5 : (int)percent_service_health, percent_service_health, percent_service_health);
+	printf("<td valign=top width=100 class='healthBar'><a href='%s?host=all&style=detail&servicestatustypes=%d'><img src='%s%s' border=0 width=%d height=20 alt='%2.1f%% 健康' title='%2.1f%% 健康'></a></td>\n", STATUS_CGI, SERVICE_CRITICAL | SERVICE_WARNING | SERVICE_PENDING, url_images_path, service_health_image, (percent_service_health < 5.0) ? 5 : (int)percent_service_health, percent_service_health, percent_service_health);
 	printf("</tr>\n");
 	printf("</table>\n");
 	printf("</td>\n");
@@ -2918,7 +2918,7 @@ void display_tac_overview(void) {
 		printf("<table border=0 width=100%%>\n");
 
 		if (flap_disabled_services > 0)
-			printf("<tr><td width=100%% class='featureItemDisabledServiceFlapDetection'><a href='%s?host=all&type=detail&serviceprops=%d'>%d禁用服务%s</a></td></tr>\n", STATUS_CGI, SERVICE_FLAP_DETECTION_DISABLED, flap_disabled_services, (flap_disabled_services == 1) ? "" : "");
+			printf("<tr><td width=100%% class='featureItemDisabledServiceFlapDetection'><a href='%s?host=all&type=detail&serviceprops=%d'>禁用%d服务%s</a></td></tr>\n", STATUS_CGI, SERVICE_FLAP_DETECTION_DISABLED, flap_disabled_services, (flap_disabled_services == 1) ? "" : "");
 		else
 			printf("<tr><td width=100%% class='featureItemEnabledServiceFlapDetection'>启用所有服务</td></tr>\n");
 
@@ -2928,7 +2928,7 @@ void display_tac_overview(void) {
 			printf("<tr><td width=100%% class='featureItemServicesNotFlapping'>无服务抖动</td></tr>\n");
 
 		if (flap_disabled_hosts > 0)
-			printf("<tr><td width=100%% class='featureItemDisabledHostFlapDetection'><a href='%s?host=all&style=hostdetail&hostprops=%d'>%d禁用主机%s</a></td></tr>\n", STATUS_CGI, HOST_FLAP_DETECTION_DISABLED, flap_disabled_hosts, (flap_disabled_hosts == 1) ? "" : "");
+			printf("<tr><td width=100%% class='featureItemDisabledHostFlapDetection'><a href='%s?host=all&style=hostdetail&hostprops=%d'>禁用%d主机%s</a></td></tr>\n", STATUS_CGI, HOST_FLAP_DETECTION_DISABLED, flap_disabled_hosts, (flap_disabled_hosts == 1) ? "" : "");
 		else
 			printf("<tr><td width=100%% class='featureItemEnabledHostFlapDetection'>启用所有主机</td></tr>\n");
 
@@ -2956,7 +2956,7 @@ void display_tac_overview(void) {
 		printf("<table border=0 width=100%%>\n");
 
 		if (notification_disabled_services > 0)
-			printf("<tr><td width=100%% class='featureItemDisabledServiceNotifications'><a href='%s?host=all&type=detail&serviceprops=%d'>%d禁用服务%s</a></td></tr>\n", STATUS_CGI, SERVICE_NOTIFICATIONS_DISABLED, notification_disabled_services, (notification_disabled_services == 1) ? "" : "");
+			printf("<tr><td width=100%% class='featureItemDisabledServiceNotifications'><a href='%s?host=all&type=detail&serviceprops=%d'>禁用%d服务%s</a></td></tr>\n", STATUS_CGI, SERVICE_NOTIFICATIONS_DISABLED, notification_disabled_services, (notification_disabled_services == 1) ? "" : "");
 		else
 			printf("<tr><td width=100%% class='featureItemEnabledServiceNotifications'>启用所有服务</td></tr>\n");
 
@@ -2985,12 +2985,12 @@ void display_tac_overview(void) {
 		printf("<table border=0 width=100%%>\n");
 
 		if (event_handler_disabled_services > 0)
-			printf("<tr><td width=100%% class='featureItemDisabledServiceHandlers'><a href='%s?host=all&type=detail&serviceprops=%d'>%d禁用服务%s</a></td></tr>\n", STATUS_CGI, SERVICE_EVENT_HANDLER_DISABLED, event_handler_disabled_services, (event_handler_disabled_services == 1) ? "" : "");
+			printf("<tr><td width=100%% class='featureItemDisabledServiceHandlers'><a href='%s?host=all&type=detail&serviceprops=%d'>禁用%d服务%s</a></td></tr>\n", STATUS_CGI, SERVICE_EVENT_HANDLER_DISABLED, event_handler_disabled_services, (event_handler_disabled_services == 1) ? "" : "");
 		else
 			printf("<tr><td width=100%% class='featureItemEnabledServiceHandlers'>启用所有服务</td></tr>\n");
 
 		if (event_handler_disabled_hosts > 0)
-			printf("<tr><td width=100%% class='featureItemDisabledHostHandlers'><a href='%s?host=all&style=hostdetail&hostprops=%d'>%d禁用主机%s</a></td></tr>\n", STATUS_CGI, HOST_EVENT_HANDLER_DISABLED, event_handler_disabled_hosts, (event_handler_disabled_hosts == 1) ? "" : "");
+			printf("<tr><td width=100%% class='featureItemDisabledHostHandlers'><a href='%s?host=all&style=hostdetail&hostprops=%d'>禁用%d主机%s</a></td></tr>\n", STATUS_CGI, HOST_EVENT_HANDLER_DISABLED, event_handler_disabled_hosts, (event_handler_disabled_hosts == 1) ? "" : "");
 		else
 			printf("<tr><td width=100%% class='featureItemEnabledHostHandlers'>启用所有主机</td></tr>\n");
 

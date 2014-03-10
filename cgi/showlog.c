@@ -772,22 +772,22 @@ void display_logentries() {
 				strcpy(image_alt, "禁用主机抖动检测");
 			} else if (temp_entry->type == LOGENTRY_SERVICE_DOWNTIME_STARTED) {
 				strcpy(image, DOWNTIME_ICON);
-				strcpy(image_alt, "输入安排服务宕机时段");
+				strcpy(image_alt, "输入安排服务宕机");
 			} else if (temp_entry->type == LOGENTRY_SERVICE_DOWNTIME_STOPPED) {
 				strcpy(image, DOWNTIME_ICON);
-				strcpy(image_alt, "退出安排服务宕机时段");
+				strcpy(image_alt, "退出安排服务宕机");
 			} else if (temp_entry->type == LOGENTRY_SERVICE_DOWNTIME_CANCELLED) {
 				strcpy(image, DOWNTIME_ICON);
-				strcpy(image_alt, "取消安排服务宕机时段");
+				strcpy(image_alt, "取消安排服务宕机");
 			} else if (temp_entry->type == LOGENTRY_HOST_DOWNTIME_STARTED) {
 				strcpy(image, DOWNTIME_ICON);
-				strcpy(image_alt, "输入安排主机宕机时段");
+				strcpy(image_alt, "输入安排主机宕机");
 			} else if (temp_entry->type == LOGENTRY_HOST_DOWNTIME_STOPPED) {
 				strcpy(image, DOWNTIME_ICON);
-				strcpy(image_alt, "退出安排主机宕机时段");
+				strcpy(image_alt, "退出安排主机宕机");
 			} else if (temp_entry->type == LOGENTRY_HOST_DOWNTIME_CANCELLED) {
 				strcpy(image, DOWNTIME_ICON);
-				strcpy(image_alt, "取消安排主机宕机时段");
+				strcpy(image_alt, "取消安排主机宕机");
 			} else if (temp_entry->type == LOGENTRY_IDOMOD) {
 				strcpy(image, DATABASE_ICON);
 				strcpy(image_alt, "IDOMOD 信息");

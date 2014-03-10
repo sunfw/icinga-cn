@@ -20,7 +20,7 @@
 
 Summary: Open Source host, service and network monitoring program
 Name: icinga
-Version: 1.9.1
+Version: 1.9.5
 Release: %{revision}%{?dist}
 License: GPLv2
 Group: Applications/System
@@ -203,7 +203,7 @@ mv %{buildroot}%{_sysconfdir}/icinga/modules/idoutils.cfg-sample %{buildroot}%{_
 install -D -m 0644 icinga.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
 
 # install sample htpasswd file
-install -D -m 0644 icinga.htpasswd %{buildroot}%{_sysconfdir}/%{name}/passwd
+install -D -m 0644 sample-config/htpasswd.users %{buildroot}%{_sysconfdir}/%{name}/htpasswd.users
 
 # install headers for development package
 install -d -m0755 "%{buildroot}%{_includedir}/%{name}/"
@@ -438,6 +438,18 @@ fi
 
 
 %changelog
+* Tue Feb 11 2013 Michael Friedrich <michael.friedrich@netways.de> - 1.9.5-1
+- bump 1.9.5
+
+* Fri Dec 13 2013 Ricardo Bartels <ricardo@bitchvrothers.com> - 1.9.4-1
+- bump 1.9.4
+
+* Sun Jul 07 2013 Michael Friedrich <michael.friedrich@netways.de> - 1.9.3-1
+- bump 1.9.3
+
+* Sun Jun 30 2013 Michael Friedrich <michael.friedrich@netways.de> - 1.9.2-1
+- bump 1.9.2
+
 * Wed May 22 2013 Michael Friedrich <michael.friedrich@netways.de> - 1.9.1-1
 - bump 1.9.1
 

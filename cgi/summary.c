@@ -627,10 +627,8 @@ int process_cgivars(void) {
 	for (x = 0; variables[x] != NULL; x++) {
 
 		/* do some basic length checking on the variable identifier to prevent buffer overflows */
-		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) {
-			x++;
+		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) 
 			continue;
-		}
 
 		/* we found first time argument */
 		else if (!strcmp(variables[x], "t1")) {
@@ -1329,9 +1327,9 @@ void add_archived_event(int event_type, time_t time_stamp, int entry_type, int s
 
 #ifdef DEBUG
 	if (event_type == AE_HOST_ALERT)
-		printf("添加主机警告 (%s) @ %lu<BR>\n", host_name, (unsigned long)time_stamp);
+		printf("添加主机警告(%s) @ %lu<BR>\n", host_name, (unsigned long)time_stamp);
 	else
-		printf("添加服务警告 (%s/%s) @ %lu<BR>\n", host_name, svc_description, (unsigned long)time_stamp);
+		printf("添加服务警告(%s/%s) @ %lu<BR>\n", host_name, svc_description, (unsigned long)time_stamp);
 #endif
 
 	/* allocate memory for the new entry */
@@ -1777,7 +1775,7 @@ void display_recent_alerts(void) {
 		} else {
 			printf("<td CLASS='%s'>%s</td>", status_bgclass, status);
 
-			printf("<td CLASS='data%s'>%s</td>", (odd) ? "Even" : "Odd", (temp_event->state_type == AE_SOFT_STATE) ? "SOFT" : "HARD");
+			printf("<td CLASS='data%s'>%s</td>", (odd) ? "Even" : "Odd", (temp_event->state_type == AE_SOFT_STATE) ? "软件状态" : "硬件状态");
 
 			printf("<td CLASS='data%s'>%s</td>", (odd) ? "Even" : "Odd", temp_event->event_info);
 
@@ -1949,9 +1947,9 @@ void display_top_alerts(void) {
 		printf("<BR>\n");
 
 		if (item_limit <= 0 || total_items <= item_limit || total_items == 0)
-			printf("<DIV ALIGN=CENTER CLASS='dataSubTitle'>显示所有%d匹配的警告\n", total_items);
+			printf("<DIV ALIGN=CENTER CLASS='dataSubTitle'>显示所有%d匹配的警告</DIV>\n", total_items);
 		else
-			printf("<DIV ALIGN=CENTER CLASS='dataSubTitle'>显示排名%d/%d匹配的警告\n", item_limit, total_items);
+			printf("<DIV ALIGN=CENTER CLASS='dataSubTitle'>显示最近%d/%d匹配的警告</DIV>\n", item_limit, total_items);
 
 		printf("<TABLE BORDER=0 CLASS='data' align='center'>\n");
 
@@ -1964,7 +1962,7 @@ void display_top_alerts(void) {
 		printf("</div>\n");
 		printf("</TD></TR>\n");
 
-		printf("<TR><TH CLASS='data'>序号</TH><TH CLASS='data'>类型</TH><TH CLASS='data'>主机</TH><TH CLASS='data'>服务</TH><TH CLASS='data'>警告总计</TH></TR>\n");
+		printf("<TR><TH CLASS='data'>序号</TH><TH CLASS='data'>产生类型</TH><TH CLASS='data'>主机</TH><TH CLASS='data'>服务</TH><TH CLASS='data'>警告总计</TH></TR>\n");
 	}
 
 

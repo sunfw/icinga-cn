@@ -81,7 +81,7 @@ MKDIR=/bin/mkdir
 ###############################
 # Global
 ###############################
-ICINGA_VERSION=1.9.1
+ICINGA_VERSION=1.9.5
 
 CP=@CP@
 
@@ -384,7 +384,6 @@ install-basic:
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(LIBEXECDIR)
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(LOGDIR)
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(LOGDIR)/archives
-	$(INSTALL) -m 777 $(INSTALL_OPTS) -d $(DESTDIR)$(LOGDIR)/log
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CHECKRESULTDIR)
 	if [ $(INSTALLPERLSTUFF) = yes ]; then \
 		$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(P1FILELOC); \
@@ -415,10 +414,7 @@ install-basic:
 	@echo "     - This installs sample config files in $(DESTDIR)$(CFGDIR)"
 	@echo ""
 	@echo "  make install-webconf"
-	@echo "     - This installs the Apache config file for the Classic UI"
-	@echo ""
-	@echo "  make install-webconf-auth"
-	@echo "     - This installs the Apache http auth file for the Classic UI"
+	@echo "     - This installs the Apache config and auth file for the Classic UI"
 	@echo ""
 	@echo ""
 	@echo "*** Make sure to check Changelog for introduced changes! ***"
@@ -435,6 +431,7 @@ install-cgiconf:
 install-config: install-cgiconf
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/objects
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/conf.d
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/modules
 	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/icinga.cfg $(DESTDIR)$(CFGDIR)/icinga.cfg
 	$(INSTALL) -b -m 660 $(INSTALL_OPTS) sample-config/resource.cfg $(DESTDIR)$(CFGDIR)/resource.cfg
@@ -466,17 +463,11 @@ install-testconfig:
 install-webconf:
 	$(MKDIR) -p -m 775 $(DESTDIR)$(HTTPD_CONF)
 	$(INSTALL) -b -m 644 $(INSTALL_OPTS) sample-config/httpd.conf $(DESTDIR)$(HTTPDCONFFILE)
-
-	@echo ""
-	@echo "*** Icinga/Apache conf file installed ***"
-	@echo ""
-
-install-webconf-auth:
 	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)
 	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/htpasswd.users $(DESTDIR)$(CFGDIR)
 
 	@echo ""
-	@echo "*** Icinga http auth file installed ***"
+	@echo "*** Icinga/Apache conf and auth file installed ***"
 	@echo ""
 
 
@@ -562,10 +553,10 @@ install-classicui-standalone: install-cgis install-html install-cgiconf install-
 
 fullinstall:
 	@if [ x$(USE_IDOUTILS) = xyes ]; then \
-		${MAKE} install install-init install-commandmode install-webconf install-webconf-auth install-idoutils install-eventhandlers;\
+		${MAKE} install install-init install-commandmode install-webconf install-idoutils install-eventhandlers;\
 		echo "Run make install-config for installing/overwriting the configs..." ;\
         else \
-		${MAKE} install install-init install-commandmode install-webconf install-webconf-auth;\
+		${MAKE} install install-init install-commandmode install-webconf ;\
 		echo "Run make install-config for installing/overwriting the configs..." ;\
         fi
 

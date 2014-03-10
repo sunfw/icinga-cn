@@ -433,9 +433,9 @@ int get_log_entries(logentry **entry_list, logfilter **filter_list, char **error
 				type = LOGENTRY_SERVICE_RECOVERY;
 			else if (strstr(temp_buffer, "服务警告:") && strstr(temp_buffer, ";正常;"))
 				type = LOGENTRY_SERVICE_OK;
-			else if (strstr(temp_buffer, "服务通知N:"))
+			else if (strstr(temp_buffer, "服务通知:"))
 				type = LOGENTRY_SERVICE_NOTIFICATION;
-			else if (strstr(temp_buffer, "服务事件处理R:"))
+			else if (strstr(temp_buffer, "服务事件处理:"))
 				type = LOGENTRY_SERVICE_EVENT_HANDLER;
 			else if (strstr(temp_buffer, "主机事件处理:"))
 				type = LOGENTRY_HOST_EVENT_HANDLER;

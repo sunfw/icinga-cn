@@ -673,13 +673,135 @@ int main(void) {
 		result_limit = 0;
 
 
-	/**
-	 *	check submitted data and create cgi_title
-	**/
+	/* keeps backwards compatibility with old search method */
+	if (navbar_search == TRUE && search_string == NULL && req_hosts[0].entry != NULL) {
+		group_style_type = STYLE_HOST_SERVICE_DETAIL;
+		search_string = strdup(req_hosts[0].entry);
+	}
 
-	/* keep backwards compatibility */
+	/* keep backwards compatibility with nostatusheader option */
 	if (nostatusheader_option == TRUE)
 		display_status_totals = FALSE;
+        
+      /* allow service_filter only for status lists */
+	if (group_style_type == STYLE_SUMMARY || group_style_type == STYLE_GRID || group_style_type == STYLE_OVERVIEW)
+		my_free(service_filter);
+
+
+	/**
+	 *	filter status data if user searched for something
+	**/
+
+	/* see if user tried searching something */
+	if (search_string != NULL) {
+
+		/* build regex string */
+
+		/* allocate for 3 extra chars, ^, $ and \0 */
+		search_regex = malloc(sizeof(char) * (strlen(search_string) * 2 + 3));
+		len = strlen(search_string);
+		for (i = 0; i < len; i++, regex_i++) {
+			if (search_string[i] == '*') {
+				search_regex[regex_i++] = '.';
+				search_regex[regex_i] = '*';
+			} else
+				search_regex[regex_i] = search_string[i];
+		}
+
+		search_regex[regex_i] = '\0';
+
+		/* check and compile regex */
+		if (regcomp(&preg, search_regex, REG_ICASE | REG_NOSUB) == 0) {
+
+			/* regular expression is valid */
+
+			/* now look through all hosts to see which one matches */
+			for (temp_hoststatus = hoststatus_list; temp_hoststatus != NULL; temp_hoststatus = temp_hoststatus->next) {
+				temp_hoststatus->search_matched = FALSE;
+
+				if ((temp_host = find_host(temp_hoststatus->host_name)) == NULL)
+					continue;
+
+				/* try to find a match */
+				if (regexec(&preg, temp_host->name, 0, NULL, 0) == 0 || \
+				        regexec(&preg, temp_host->display_name, 0, NULL, 0) == 0 || \
+				        regexec(&preg, temp_host->alias, 0, NULL, 0) == 0 || \
+				        regexec(&preg, temp_host->address, 0, NULL, 0) == 0 || \
+				        regexec(&preg, temp_host->address6, 0, NULL, 0) == 0) {
+
+					temp_hoststatus->search_matched = TRUE;
+					host_items_found = TRUE;
+				}
+			}
+
+			for (temp_servicestatus = servicestatus_list; temp_servicestatus != NULL; temp_servicestatus = temp_servicestatus->next) {
+				temp_servicestatus->search_matched = FALSE;
+
+				/* find the service  */
+				temp_service = find_service(temp_servicestatus->host_name, temp_servicestatus->description);
+
+				if (temp_service == NULL)
+					continue;
+
+				/* try to match on combination of host name and service description */
+				snprintf(host_service_name, sizeof(host_service_name), "%s %s", temp_service->host_name, temp_service->display_name);
+				host_service_name[sizeof(host_service_name) - 1] = '\x0';
+
+				/* try to find a match */
+				if (regexec(&preg, temp_service->description, 0, NULL, 0) == 0 || \
+				        regexec(&preg, temp_service->display_name, 0, NULL, 0) == 0 || \
+				        regexec(&preg, temp_service->host_name, 0, NULL, 0) == 0 || \
+				        regexec(&preg, host_service_name, 0, NULL, 0) == 0) {
+
+					temp_servicestatus->search_matched = TRUE;
+					service_items_found = TRUE;
+				}
+			}
+
+
+			/* if we didn't found anything until now we start looking for hostgroups and servicegroups */
+			if (host_items_found == FALSE && service_items_found == FALSE) {
+
+				/* try to find hostgroup */
+				found = FALSE;
+				for (temp_hostgroup = hostgroup_list; temp_hostgroup != NULL; temp_hostgroup = temp_hostgroup->next) {
+					if (regexec(&preg, temp_hostgroup->group_name, 0, NULL, 0) == 0) {
+						req_hostgroups[num_req_hostgroups++].entry = strdup(temp_hostgroup->group_name);
+						display_type = DISPLAY_HOSTGROUPS;
+						show_all_hostgroups = FALSE;
+						found = TRUE;
+					}
+				}
+
+				/* if no hostgroup matched, try to find a serviegroup */
+				if (found == FALSE) {
+					for (temp_servicegroup = servicegroup_list; temp_servicegroup != NULL; temp_servicegroup = temp_servicegroup->next) {
+						if (regexec(&preg, temp_servicegroup->group_name, 0, NULL, 0) == 0) {
+							req_servicegroups[num_req_servicegroups++].entry = strdup(temp_servicegroup->group_name);
+							display_type = DISPLAY_SERVICEGROUPS;
+							show_all_servicegroups = FALSE;
+						}
+					}
+				}
+			}
+		}
+
+		/* free regular expression */
+		regfree(&preg);
+		my_free(search_regex);
+
+		user_is_authorized_for_statusdata = TRUE;
+
+		/* check the search result and trigger the desired view */
+		if (host_items_found == TRUE && service_items_found == FALSE && group_style_type == STYLE_HOST_SERVICE_DETAIL)
+			group_style_type = STYLE_HOST_DETAIL;
+		else if (host_items_found == FALSE && service_items_found == TRUE && group_style_type == STYLE_HOST_SERVICE_DETAIL)
+			group_style_type = STYLE_SERVICE_DETAIL;
+	}  
+
+	/**
+	 *	check submitted data, create url_parts and create cgi_title
+	**/
 
 
 	/* determine display of hosts */
@@ -792,132 +914,6 @@ int main(void) {
 	document_header(CGI_ID, TRUE, (tab_friendly_titles && cgi_title != NULL) ? cgi_title : "目前网络状态");
 
 	my_free(cgi_title);
-
-
-	/**
-	 *	check some more submitted data
-	**/
-
-	/* keeps backwards compatibility with old search method */
-	if (navbar_search == TRUE && search_string == NULL && req_hosts[0].entry != NULL) {
-		group_style_type = STYLE_HOST_SERVICE_DETAIL;
-		search_string = strdup(req_hosts[0].entry);
-	}
-
-	/* allow service_filter only for status lists */
-	if (group_style_type == STYLE_SUMMARY || group_style_type == STYLE_GRID || group_style_type == STYLE_OVERVIEW)
-		my_free(service_filter);
-
-	/**
-	 *	filter status data if user searched for something
-	**/
-
-	/* see if user tried searching something */
-	if (search_string != NULL) {
-
-		/* build regex string */
-
-		/* allocate for 3 extra chars, ^, $ and \0 */
-		search_regex = malloc(sizeof(char) * (strlen(search_string) * 2 + 3));
-		len = strlen(search_string);
-		for (i = 0; i < len; i++, regex_i++) {
-			if (search_string[i] == '*') {
-				search_regex[regex_i++] = '.';
-				search_regex[regex_i] = '*';
-			} else
-				search_regex[regex_i] = search_string[i];
-		}
-
-		search_regex[regex_i] = '\0';
-
-		/* check and compile regex */
-		if (regcomp(&preg, search_regex, REG_ICASE | REG_NOSUB) == 0) {
-
-			/* regular expression is valid */
-
-			/* now look through all hosts to see which one matches */
-			for (temp_hoststatus = hoststatus_list; temp_hoststatus != NULL; temp_hoststatus = temp_hoststatus->next) {
-				temp_hoststatus->search_matched = FALSE;
-
-				if ((temp_host = find_host(temp_hoststatus->host_name)) == NULL)
-					continue;
-
-				/* try to find a match */
-				if (regexec(&preg, temp_host->name, 0, NULL, 0) == 0 || \
-				        regexec(&preg, temp_host->display_name, 0, NULL, 0) == 0 || \
-				        regexec(&preg, temp_host->alias, 0, NULL, 0) == 0 || \
-				        regexec(&preg, temp_host->address, 0, NULL, 0) == 0 || \
-				        regexec(&preg, temp_host->address6, 0, NULL, 0) == 0) {
-
-					temp_hoststatus->search_matched = TRUE;
-					host_items_found = TRUE;
-				}
-			}
-
-			for (temp_servicestatus = servicestatus_list; temp_servicestatus != NULL; temp_servicestatus = temp_servicestatus->next) {
-				temp_servicestatus->search_matched = FALSE;
-
-				/* find the service  */
-				temp_service = find_service(temp_servicestatus->host_name, temp_servicestatus->description);
-
-				if (temp_service == NULL)
-					continue;
-
-				/* try to match on combination of host name and service description */
-				snprintf(host_service_name, sizeof(host_service_name), "%s %s", temp_service->host_name, temp_service->display_name);
-				host_service_name[sizeof(host_service_name) - 1] = '\x0';
-
-				/* try to find a match */
-				if (regexec(&preg, temp_service->description, 0, NULL, 0) == 0 || \
-				        regexec(&preg, temp_service->display_name, 0, NULL, 0) == 0 || \
-				        regexec(&preg, temp_service->host_name, 0, NULL, 0) == 0 || \
-				        regexec(&preg, host_service_name, 0, NULL, 0) == 0) {
-
-					temp_servicestatus->search_matched = TRUE;
-					service_items_found = TRUE;
-				}
-			}
-
-
-			/* if didn't found anything until now we start looking for hostgroups and servicegroups */
-			if (host_items_found == FALSE && service_items_found == FALSE) {
-
-				/* try to find hostgroup */
-				found = FALSE;
-				for (temp_hostgroup = hostgroup_list; temp_hostgroup != NULL; temp_hostgroup = temp_hostgroup->next) {
-					if (regexec(&preg, temp_hostgroup->group_name, 0, NULL, 0) == 0) {
-						req_hostgroups[num_req_hostgroups++].entry = strdup(temp_hostgroup->group_name);
-						display_type = DISPLAY_HOSTGROUPS;
-						show_all_hostgroups = FALSE;
-						found = TRUE;
-					}
-				}
-
-				/* if no hostgroup matched, try to find a serviegroup */
-				if (found == FALSE) {
-					for (temp_servicegroup = servicegroup_list; temp_servicegroup != NULL; temp_servicegroup = temp_servicegroup->next) {
-						if (regexec(&preg, temp_servicegroup->group_name, 0, NULL, 0) == 0) {
-							req_servicegroups[num_req_servicegroups++].entry = strdup(temp_servicegroup->group_name);
-							display_type = DISPLAY_SERVICEGROUPS;
-							show_all_servicegroups = FALSE;
-						}
-					}
-				}
-			}
-		}
-
-		/* free regular expression */
-		regfree(&preg);
-		my_free(search_regex);
-
-		user_is_authorized_for_statusdata = TRUE;
-
-		/* check the search result and trigger the desired view */
-		if (host_items_found == TRUE && service_items_found == FALSE && group_style_type == STYLE_HOST_SERVICE_DETAIL)
-			group_style_type = STYLE_HOST_DETAIL;
-		else if (host_items_found == FALSE && service_items_found == TRUE && group_style_type == STYLE_HOST_SERVICE_DETAIL)
-			group_style_type = STYLE_SERVICE_DETAIL;
-	}
 
 	/* pre filter for service groups
 	   this way we mark all services which belong to a servicegroup we want to see once.
@@ -1548,10 +1544,8 @@ int process_cgivars(void) {
 	for (x = 0; variables[x] != NULL; x++) {
 
 		/* do some basic length checking on the variable identifier to prevent buffer overflows */
-		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) {
-			x++;
+		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1)
 			continue;
-		}
 
 		/* we found the search_string argument */
 		else if (!strcmp(variables[x], "search_string")) {
@@ -2186,7 +2180,7 @@ void show_service_detail(void) {
 				printf("尝试次数");
 			else if (sort_option == SORT_STATEDURATION)
 				printf("状态持续时间");
-			printf("</b>条目排序(%s)\n", (sort_type == SORT_ASCENDING) ? "升序" : "降序");
+			printf("</b>排序(%s)\n", (sort_type == SORT_ASCENDING) ? "升序" : "降序");
 			printf("</DIV>\n");
 		}
 
@@ -2268,23 +2262,23 @@ void show_service_detail(void) {
 
 		printf("<TR>\n");
 
-		printf("<TH CLASS='status'>主机&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT=''主机名称排序(升序)' TITLE=''主机名称排序(升序)></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT=''主机名称排序(降序)' TITLE=''主机名称排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_HOSTNAME, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_HOSTNAME, url_images_path, DOWN_ARROW_ICON);
+		printf("<TH CLASS='status'>主机&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按主机名称排序(升序)' TITLE='按主机名称排序(升序)></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按主机名称排序(降序)' TITLE='主机名称排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_HOSTNAME, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_HOSTNAME, url_images_path, DOWN_ARROW_ICON);
 
-		printf("<TH CLASS='status'>服务&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='服务名称排序(升序)' TITLE='服务名称排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='服务名称排序(降序)' TITLE='服务名称排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_SERVICENAME, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_SERVICENAME, url_images_path, DOWN_ARROW_ICON);
+		printf("<TH CLASS='status'>服务&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按服务名称排序(升序)' TITLE='按服务名称排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按服务名称排序(降序)' TITLE='按服务名称排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_SERVICENAME, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_SERVICENAME, url_images_path, DOWN_ARROW_ICON);
 
-		printf("<TH CLASS='status'>服务&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='服务状态排序(升序)' TITLE='服务状态排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='服务状态排序(降序)' TITLE='服务状态排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_SERVICESTATUS, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_SERVICESTATUS, url_images_path, DOWN_ARROW_ICON);
+		printf("<TH CLASS='status'>状态&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按服务状态排序(升序)' TITLE='按服务状态排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按服务状态排序(降序)' TITLE='按服务状态排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_SERVICESTATUS, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_SERVICESTATUS, url_images_path, DOWN_ARROW_ICON);
 
-		printf("<TH CLASS='status'>最近检查&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='最近检查时间排序(升序)' TITLE='最近检查时间排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='最近检查时间排序(降序)' TITLE='最近检查时间排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_LASTCHECKTIME, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_LASTCHECKTIME, url_images_path, DOWN_ARROW_ICON);
+		printf("<TH CLASS='status'>最近检查&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按最近检查时间排序(升序)' TITLE='按最近检查时间排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按最近检查时间排序(降序)' TITLE='按最近检查时间排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_LASTCHECKTIME, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_LASTCHECKTIME, url_images_path, DOWN_ARROW_ICON);
 
-		printf("<TH CLASS='status'>持续时间&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='状态持续时间排序(升序)' TITLE='状态持续时间排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT=''状态持续时间排序((降序)' TITLE='状态持续时间排序((降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_STATEDURATION, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_STATEDURATION, url_images_path, DOWN_ARROW_ICON);
+		printf("<TH CLASS='status'>持续时间&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按状态持续时间排序(升序)' TITLE='按状态持续时间排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按状态持续时间排序((降序)' TITLE='按状态持续时间排序((降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_STATEDURATION, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_STATEDURATION, url_images_path, DOWN_ARROW_ICON);
 
-		printf("<TH CLASS='status'>尝试&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='目前尝试排序(升序)' TITLE='目前尝试排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='目前尝试排序(降序)' TITLE='目前尝试排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_CURRENTATTEMPT, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_CURRENTATTEMPT, url_images_path, DOWN_ARROW_ICON);
+		printf("<TH CLASS='status'>尝试&nbsp;<A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按目前尝试排序(升序)' TITLE='按目前尝试排序(升序)'></A><A HREF='%s%s&sorttype=%d&sortoption=%d'><IMG SRC='%s%s' BORDER=0 ALT='按目前尝试排序(降序)' TITLE='按目前尝试排序(降序)'></A></TH>", temp_url, temp_buffer, SORT_ASCENDING, SORT_CURRENTATTEMPT, url_images_path, UP_ARROW_ICON, temp_url, temp_buffer, SORT_DESCENDING, SORT_CURRENTATTEMPT, url_images_path, DOWN_ARROW_ICON);
 
 		printf("<TH CLASS='status'>状态信息</TH>\n");
 
 		if (is_authorized_for_read_only(&current_authdata) == FALSE) {
 			/* Add checkbox so every service can be checked */
-			printf("<TH CLASS='status' width='16'><input type='checkbox' value=all onclick=\"checkAll('tableformservice');isValidForSubmit('tableformservice');\"></TH>\n");
+			printf("<TH CLASS='status' width='16'><input type='checkbox' value='所有' onclick=\"checkAll('tableformservice');isValidForSubmit('tableformservice');\"></TH>\n");
 		}
 
 		printf("</TR>\n");
@@ -2491,7 +2485,7 @@ void show_service_detail(void) {
 						printf("<TD ALIGN=center valign=center><A HREF='%s?type=%d&host=%s'><IMG SRC='%s%s' BORDER=0 WIDTH=%d HEIGHT=%d ALT='已禁用该主机的主动和被动检查' TITLE='已禁用该主机的主动和被动检查'></A></TD>", EXTINFO_CGI, DISPLAY_HOST_INFO, url_encode(temp_status->host_name), url_images_path, DISABLED_ICON, STATUS_ICON_WIDTH, STATUS_ICON_HEIGHT);
 				}
 				if (temp_hoststatus->is_flapping == TRUE) {
-					printf("<TD ALIGN=center valign=center><A HREF='%s?type=%d&host=%s'><IMG SRC='%s%s' BORDER=0 WIDTH=%d HEIGHT=%d ALT='主机处于状态抖动期' TITLE='主机处于状态抖动期'></A></TD>", EXTINFO_CGI, DISPLAY_HOST_INFO, url_encode(temp_status->host_name), url_images_path, FLAPPING_ICON, STATUS_ICON_WIDTH, STATUS_ICON_HEIGHT);
+					printf("<TD ALIGN=center valign=center><A HREF='%s?type=%d&host=%s'><IMG SRC='%s%s' BORDER=0 WIDTH=%d HEIGHT=%d ALT='该主机处于状态抖动期' TITLE='该主机处于状态抖动期'></A></TD>", EXTINFO_CGI, DISPLAY_HOST_INFO, url_encode(temp_status->host_name), url_images_path, FLAPPING_ICON, STATUS_ICON_WIDTH, STATUS_ICON_HEIGHT);
 				}
 				if (temp_hoststatus->scheduled_downtime_depth > 0) {
 					printf("<TD ALIGN=center valign=center><A HREF='%s?type=%d&host=%s'><IMG SRC='%s%s' BORDER=0 WIDTH=%d HEIGHT=%d ALT='该主机当前处于安排宕机期间' TITLE='该主机当前处于安排宕机期间'></A></TD>", EXTINFO_CGI, DISPLAY_HOST_INFO, url_encode(temp_status->host_name), url_images_path, DOWNTIME_ICON, STATUS_ICON_WIDTH, STATUS_ICON_HEIGHT);
@@ -2913,7 +2907,7 @@ void show_host_detail(void) {
 
 		if (is_authorized_for_read_only(&current_authdata) == FALSE) {
 			/* Add a checkbox so every host can be checked */
-			printf("<TH CLASS='status' width='16'><input type='checkbox' value=all onclick=\"checkAll('tableformhost');isValidForSubmit('tableformhost');\"></TH>\n");
+			printf("<TH CLASS='status' width='16'><input type='checkbox' value='所有' onclick=\"checkAll('tableformhost');isValidForSubmit('tableformhost');\"></TH>\n");
 		}
 
 		printf("</TR>\n");
@@ -6948,11 +6942,17 @@ void status_page_num_selector(int local_result_start, int status_type) {
 	/* get url options but filter out "limit" and "status" */
 	if (getenv("QUERY_STRING") != NULL && strcmp(getenv("QUERY_STRING"), "")) {
 		if(strlen(getenv("QUERY_STRING")) > MAX_INPUT_BUFFER) {
-			printf("status_page_num_selector(): 无法分配 stripped_query_string 的内存.\n");
-			exit(1);
+			write_to_cgi_log("status_page_num_selector(): 查询字符串超过最大长度. 返回而不显示页面数字选择器.\n");
+			return;
 		}
 		strcpy(stripped_query_string, getenv("QUERY_STRING"));
 		strip_html_brackets(stripped_query_string);
+
+		/* check if concatenated strings exceed MAX_INPUT_BUFFER */
+		if (strlen(link) + strlen(stripped_query_string) + 1 > MAX_INPUT_BUFFER) {
+			write_to_cgi_log("status_page_num_selector(): 完整查询字符串超过最大长度. 返回而不显示页面数字选择器.\n");
+			return;
+		}
 
 		for (temp_buffer = my_strtok(stripped_query_string, "&"); temp_buffer != NULL; temp_buffer = my_strtok(NULL, "&")) {
 			if (strncmp(temp_buffer, "limit=", 6) != 0 && strncmp(temp_buffer, "start=", 6) != 0) {

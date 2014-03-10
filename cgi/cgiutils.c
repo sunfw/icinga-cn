@@ -1151,7 +1151,7 @@ void document_header(int cgi_id, int use_stylesheet, char *cgi_title) {
 		break;
 	}
 
-	if (!strcmp(cgi_title, "Error"))
+	if (!strcmp(cgi_title, "错误"))
 		cgi_body_class = "error";
 
 	// don't refresh non html output
@@ -2251,11 +2251,17 @@ void display_nav_table(time_t ts_start, time_t ts_end) {
 	/* get url options but filter out "ts_end", "ts_start" and "start" */
 	if (getenv("QUERY_STRING") != NULL && strcmp(getenv("QUERY_STRING"), "")) {
 		if(strlen(getenv("QUERY_STRING")) > MAX_INPUT_BUFFER) {
-			printf("display_nav_table(): stripped_query_string 无法分配内存\n");
-			exit(1);
-		}
+			write_to_cgi_log("display_nav_table(): 查询字符串超过最大长度. 返回而不显示导航表单.\n");
+			return;
+		}		
 		strcpy(stripped_query_string, getenv("QUERY_STRING"));
 		strip_html_brackets(stripped_query_string);
+
+    	/* check if concatenated strings exceed MAX_INPUT_BUFFER */
+		if (strlen(url) + strlen(stripped_query_string) + 1 > MAX_INPUT_BUFFER) {
+			write_to_cgi_log("display_nav_table(): 完整查询字符串超过最大长度. 返回而不显示导航表单.\n");
+			return;
+		}
 
 		for (temp_buffer = my_strtok(stripped_query_string, "&"); temp_buffer != NULL; temp_buffer = my_strtok(NULL, "&")) {
 			if (strncmp(temp_buffer, "ts_start=", 9) != 0 && strncmp(temp_buffer, "ts_end=", 6) != 0 && strncmp(temp_buffer, "start=", 6) != 0) {
@@ -2315,7 +2321,7 @@ void display_nav_table(time_t ts_start, time_t ts_end) {
 		printf("<td align=center valign=center CLASS='navBoxItem'>\n");
 		if (ts_end == ts_midnight) {
 			printf("当前日志<br>");
-			printf("<a href='%s%sts_start=%lu&ts_end=%lu'><img src='%s%s' border=0 alt='当前日�' title='当前日�'></a>", url, (strstr(url, "?")) ? "&" : "?", ts_midnight + 1, ts_midnight + 86400, url_images_path, RIGHT_ARROW_ICON);
+			printf("<a href='%s%sts_start=%lu&ts_end=%lu'><img src='%s%s' border=0 alt='当前日志' title='当前日志'></a>", url, (strstr(url, "?")) ? "&" : "?", ts_midnight + 1, ts_midnight + 86400, url_images_path, RIGHT_ARROW_ICON);
 		} else {
 			printf("更多近期存档<br>");
 			printf("<a href='%s%sts_start=%lu&ts_end=%lu'><img src='%s%s' border=0 alt='更多近期存档' title='更多近期存档'></a>", url, (strstr(url, "?")) ? "&" : "?", ts_end + 1, ts_end + 86400, url_images_path, RIGHT_ARROW_ICON);
@@ -2656,15 +2662,15 @@ void object_data_error(int tac_header) {
 void status_data_error(int tac_header) {
 
 	if (content_type == CSV_CONTENT) {
-		printf("Error: Could not read host and service status information!\n");
+		printf("错误: 无法读取主机和服务状态信息!\n");
 		return;
 	}
 
 	if (content_type == JSON_CONTENT) {
-		printf("\"title\": \"Could not read host and service status information!\"\n,");
-		printf("\"text\": \"");
-		printf("It seems that %s is not running or has not yet finished the startup procedure and then creating the status data file. If %s is indeed not running, this is a normal error message. ", PROGRAM_NAME, PROGRAM_NAME);
-		printf("Please note that event broker modules and/or rdbms backends may slow down the overall (re)start and the cgis cannot retrieve any status information.");
+	printf("\"标题\": \"无法读取主机和服务状态信息!\"\n,");
+		printf("\"文本\": \"");
+		printf("很显然%s没有运行或尚未完成启动程序和创建状态数据文件. 如果%s确实没有运行, 这是一个正常的错误消息. ", PROGRAM_NAME, PROGRAM_NAME);
+		printf("请注意事件代理模块和/或rdbms后端可能会减慢整体启动(重启),并且cgi无法检索任何状态信息.");
 		printf("\"\n");
 		return;
 	}
@@ -2877,17 +2883,23 @@ void print_export_link(int content_type, char *cgi, char *add_to_url) {
 	/* just do stuff if some options are requested */
 	if (getenv("QUERY_STRING") != NULL && strcmp(getenv("QUERY_STRING"), "")) {
 		if(strlen(getenv("QUERY_STRING")) > MAX_INPUT_BUFFER) {
-			printf("print_export_link(): stripped_query_string 无法分配内存\n");
-			exit(1);
+			write_to_cgi_log("print_export_link(): 查询字符串超过最大长度. 返回而不显示导出链接.\n");
+			return;
 		}
 		strcpy(stripped_query_string, getenv("QUERY_STRING"));
 		strip_html_brackets(stripped_query_string);
-		strcat(link, "?");
-		strcat(link, stripped_query_string);
+		/* check if concatenated strings exceed MAX_INPUT_BUFFER */
+		if (strlen(link) + strlen(stripped_query_string) + 2 > MAX_INPUT_BUFFER) {
+			write_to_cgi_log("print_export_link(): 完整查询字符串超过最大长度. 返回而不显示导出链接.\n");
+			return;
+		}
+
+ 		strcat(link, "?");
+ 		strcat(link, stripped_query_string);
 	}
 
 	/* add string to url */
-	if (add_to_url != NULL && (strlen(add_to_url) != 0)) {
+	if (add_to_url != NULL && strlen(add_to_url) != 0 && strlen(link) + strlen(stripped_query_string) + strlen(add_to_url) + 2 <= MAX_INPUT_BUFFER) {
 		if (strlen(stripped_query_string) != 0)
 			strcat(link, "&");
 		else
@@ -3700,12 +3712,19 @@ void page_num_selector(int result_start, int total_entries, int displayed_entrie
 	/* get url options but filter out "limit" and "status" */
 	if (getenv("QUERY_STRING") != NULL && strcmp(getenv("QUERY_STRING"), "")) {
 		if(strlen(getenv("QUERY_STRING")) > MAX_INPUT_BUFFER) {
-			printf("page_num_selector(): stripped_query_string 无法分配内存\n");
-			exit(1);
+			write_to_cgi_log("page_num_selector(): 查询字符串超过最大长度. 返回而不显示数字选择器.\n");
+			return;
 		}
+		
 		strcpy(stripped_query_string, getenv("QUERY_STRING"));
 		strip_html_brackets(stripped_query_string);
-
+		
+		/* check if concatenated strings exceed MAX_INPUT_BUFFER */
+		if (strlen(link) + strlen(stripped_query_string) + 1 > MAX_INPUT_BUFFER) {
+			write_to_cgi_log("page_num_selector(): 完整查询字符串超过最大长度. 返回而不显示数字选择器.\n");
+			return;
+		}
+		
 		for (temp_buffer = my_strtok(stripped_query_string, "&"); temp_buffer != NULL; temp_buffer = my_strtok(NULL, "&")) {
 			if (strncmp(temp_buffer, "limit=", 6) != 0 && strncmp(temp_buffer, "start=", 6) != 0) {
 				if (strstr(link, "?"))
@@ -3817,11 +3836,18 @@ void page_limit_selector(int result_start) {
 	/* get url options but filter out "limit" and "status" */
 	if (getenv("QUERY_STRING") != NULL && strcmp(getenv("QUERY_STRING"), "")) {
 		if(strlen(getenv("QUERY_STRING")) > MAX_INPUT_BUFFER) {
-			printf("display_nav_table(): stripped_query_string 无法分配内存\n");
-			exit(1);
+			write_to_cgi_log("page_limit_selector(): 查询字符串超过最大长度. 返回而不显示页数限制选择器.\n");
+			return;
 		}
+
 		strcpy(stripped_query_string, getenv("QUERY_STRING"));
 		strip_html_brackets(stripped_query_string);
+
+		/* check if concatenated strings exceed MAX_INPUT_BUFFER */
+		if (strlen(link) + strlen(stripped_query_string) + 1 > MAX_INPUT_BUFFER) {
+			write_to_cgi_log("page_limit_selector(): 完整查询字符串超过最大长度. 返回而不显示页数限制选择器.\n");
+			return;
+		}
 
 		for (temp_buffer = my_strtok(stripped_query_string, "&"); temp_buffer != NULL; temp_buffer = my_strtok(NULL, "&")) {
 			if (strncmp(temp_buffer, "limit=", 6) != 0 && strncmp(temp_buffer, "start=", 6) != 0) {

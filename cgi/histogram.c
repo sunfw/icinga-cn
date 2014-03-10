@@ -442,7 +442,7 @@ int main(int argc, char **argv) {
 			} else {
 				printf("<option value=%d %s>所有服务事件\n",GRAPH_SERVICE_ALL,(graph_events==GRAPH_SERVICE_ALL)?"SELECTED":"");
 				printf("<option value=%d %s>服务故障事件\n",GRAPH_SERVICE_PROBLEMS,(graph_events==GRAPH_SERVICE_PROBLEMS)?"SELECTED":"");
-				printf("<option value=%d %s服务正常事件\n",GRAPH_SERVICE_OK,(graph_events==GRAPH_SERVICE_OK)?"SELECTED":"");
+				printf("<option value=%d %s>服务正常事件\n",GRAPH_SERVICE_OK,(graph_events==GRAPH_SERVICE_OK)?"SELECTED":"");
 				printf("<option value=%d %s>服务警告事件\n",GRAPH_SERVICE_WARNING,(graph_events==GRAPH_SERVICE_WARNING)?"SELECTED":"");
 				printf("<option value=%d %s>服务未知事件\n",GRAPH_SERVICE_UNKNOWN,(graph_events==GRAPH_SERVICE_UNKNOWN)?"SELECTED":"");
 				printf("<option value=%d %s>服务严重事件\n", GRAPH_SERVICE_CRITICAL, (graph_events == GRAPH_SERVICE_CRITICAL) ? "SELECTED" : "");
@@ -904,10 +904,8 @@ int process_cgivars(void) {
 	for (x = 0; variables[x] != NULL; x++) {
 
 		/* do some basic length checking on the variable identifier to prevent buffer overflows */
-		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) {
-			x++;
+		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) 
 			continue;
-		}
 
 		/* we found the host argument */
 		else if (!strcmp(variables[x], "host")) {
@@ -1423,7 +1421,7 @@ void graph_all_histogram_data(void) {
 
 
 #ifdef DEBUG
-	printf("缓冲总计: %d\n", total_buckets);
+	printf("总计缓冲: %d\n", total_buckets);
 #endif
 
 	/* determine max value in the buckets (for scaling) */
@@ -1479,8 +1477,8 @@ void graph_all_histogram_data(void) {
 		x_units = x_scaling_factor;
 
 #ifdef DEBUG
-	printf("绘图宽度: %d\n", DRAWING_WIDTH);
-	printf("绘图高度: %d\n", DRAWING_HEIGHT);
+	printf("绘制宽度: %d\n", DRAWING_WIDTH);
+	printf("绘制高度: %d\n", DRAWING_HEIGHT);
 	printf("最大值: %lu\n", max_value);
 	printf("x换算系数: %.3f\n", x_scaling_factor);
 	printf("y换算系数: %.3f\n", y_scaling_factor);
@@ -1638,7 +1636,7 @@ void graph_all_histogram_data(void) {
 
 
 #ifdef DEBUG
-	printf("准备开始绘图 (缓冲总计=%d)...\n", total_buckets);
+	printf("准备开始绘制 (总计缓冲=%d)...\n", total_buckets);
 #endif
 
 

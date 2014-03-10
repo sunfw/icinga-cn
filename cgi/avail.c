@@ -412,9 +412,9 @@ int main(int argc, char **argv) {
 #ifdef USE_HISTOGRAM
 				printf("<a href='%s?host=%s&service=%s&t1=%lu&t2=%lu&assumestateretention=%s'>查看该服务警告柱状图</a><br>\n", HISTOGRAM_CGI, url_encode(host_name), url_encode(service_desc), t1, t2, (assume_state_retention == TRUE) ? "yes" : "no");
 #endif
-				printf("<a href='%s?type=%d&host=%s&service=%s'>查看该服务信息<br>\n", EXTINFO_CGI, DISPLAY_SERVICE_INFO, url_encode(host_name), url_encode(service_desc));
+				printf("<a href='%s?type=%d&host=%s&service=%s'>查看该服务信息</a><br>\n", EXTINFO_CGI, DISPLAY_SERVICE_INFO, url_encode(host_name), url_encode(service_desc));
 				printf("<a href='%s?host=%s&service=%s'>查看该服务警告历史</a><br>\n", HISTORY_CGI, url_encode(host_name), url_encode(service_desc));
-				printf("<a href='%s?host=%s&service=%s'>查看该服务通知信息<br>\n", NOTIFICATIONS_CGI, url_encode(host_name), url_encode(service_desc));
+				printf("<a href='%s?host=%s&service=%s'>查看该服务通知信息</a><br>\n", NOTIFICATIONS_CGI, url_encode(host_name), url_encode(service_desc));
 			}
 
 			printf("</TD></TR>\n");
@@ -838,7 +838,7 @@ int main(int argc, char **argv) {
 
 		printf("<table border=0 cellpadding=5 align='center'>\n");
 
-		printf("<tr><td class='reportSelectSubTitle' valign=center>Servicegroup(s):</td><td align=left valign=center class='reportSelectItem'>\n");
+		printf("<tr><td class='reportSelectSubTitle' valign=center>服务组:</td><td align=left valign=center class='reportSelectItem'>\n");
 		printf("<select name='servicegroup'>\n");
 		printf("<option value='all'>** 所有服务组 **\n");
 		for (temp_servicegroup = servicegroup_list; temp_servicegroup != NULL; temp_servicegroup = temp_servicegroup->next) {
@@ -1110,10 +1110,8 @@ int process_cgivars(void) {
 	for (x = 0; variables[x] != NULL; x++) {
 
 		/* do some basic length checking on the variable identifier to prevent buffer overflows */
-		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1) {
-			x++;
+		if (strlen(variables[x]) >= MAX_INPUT_BUFFER - 1)
 			continue;
-		}
 
 		/* we found the hostgroup argument */
 		else if (!strcmp(variables[x], "hostgroup")) {
@@ -5014,7 +5012,7 @@ void display_host_availability(void) {
 			printf("<DIV ALIGN=CENTER CLASS='dataTitle'>主机状态细分:</DIV>\n");
 
 			printf("<TABLE BORDER=0 CLASS='data' align='center'>\n");
-			printf("<TR><TH CLASS='data'>Host</TH><TH CLASS='data'>%% 正常时间</TH><TH CLASS='data'>%% 宕机时间</TH><TH CLASS='data'>%% 不可达时间</TH><TH CLASS='data'>%% 未决时间</TH></TR>\n");
+			printf("<TR><TH CLASS='data'>主机</TH><TH CLASS='data'>%% 正常时间</TH><TH CLASS='data'>%% 宕机时间</TH><TH CLASS='data'>%% 不可达时间</TH><TH CLASS='data'>%% 未决时间</TH></TR>\n");
 		} else if (content_type == JSON_CONTENT) {
 			printf("\"主机可用性\": {\n");
 			printf("\"主机\": [\n");

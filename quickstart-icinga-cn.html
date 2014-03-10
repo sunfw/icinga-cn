@@ -1,0 +1,1188 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Icinga快速安装与配置</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.1">
+<meta name="keywords" content="Supervision, Icinga, Nagios, Linux">
+<style type="text/css">
+/* body */
+body {
+	margin: 20px;
+	padding: 0;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, Arial, sans-serif;
+	font-size: 0.72em;
+	color: #262625;
+	/*background: #EFEFEF;*/
+	background: #FFFFFF;
+	font-family: verdana, sans-serif;
+}
+
+/* urls */
+a:link, a:visited, a:active {
+	color: #1F1F1F;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+a:hover {
+	color: #FFB600;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+
+ul, ol, dl, p, h1, h2, h3, h4, h5, h6 {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+/* remove margins on sub-lists */
+ul ul, ul ol, ol ul, ol ol {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+/* code style */
+code, pre {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 1em;
+}
+pre {
+	overflow: auto;
+	word-wrap: normal;
+	padding-bottom: 1.5em;
+	overflow-y: hidden;
+}
+abbr[title], acronym[title] {
+	border-bottom: 1px dotted;
+}
+
+hr {
+	display: block;
+	height: 2px;
+	border: none;
+	margin: 0.5em auto;
+	color: #cccccc;
+	background-color: #cccccc;
+}
+
+/* use the body's font size in tables, too: */
+table {
+	font-size: 1em;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: 0;
+}
+
+/* block shadows */
+pre.literallayout,
+.screen,
+.synopsis,
+.programlisting,
+.refsynopsysdiv p,
+div.note,
+.warning,
+.important
+.informataltable {
+	-moz-box-shadow: 3px 3px 5px #DFDFDF;
+	-webkit-box-shadow: 3px 3px 5px #DFDFDF;
+	-khtml-box-shadow: 3px 3px 5px #DFDFDF;
+	-o-box-shadow: 3px 3px 5px #DFDFDF;
+	box-shadow: 3px 3px 5px #DFDFDF;
+}
+
+/* block layout */
+pre.literallayout,
+.screen,
+.synopsis,
+.programlisting,
+.refsynopsysdiv p,
+div.note,
+.warning,
+.important,
+.informataltable {
+	color: black;
+	border-width: 1px;
+	border-style: solid;
+	padding: 2ex;
+	margin: 2ex 0 2ex 2ex;
+	overflow: auto;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-khtml-border-radius: 8px;
+	border-radius: 8px;
+}
+
+/* non programlisting blocks */
+pre.literallayout,
+pre.synopsis,
+.refsynopsis p,
+.screen {
+	border-color: #CFCFCF;
+	background-color: #F7F7F7;
+}
+
+/* programlisting special */
+pre.programlisting {
+	border-color: #CFCFCF;
+	background-color: #EFEFEF;
+	border: 1px dashed black;
+	margin-right: 0.5in;
+}
+
+/* informaltable special */
+div.informaltable,
+.informaltable.table,
+.informaltable.table tr,
+.informaltable.table td {
+	border-collapse: collapse;
+	border-spacing: 10px;
+	font-size: 1em;
+	border-color: #CFCFCF;
+	background-color: #EFEFEF;
+	border: 1px dotted black;
+	margin: 2px 5px;
+	padding: 0.5em;
+}
+
+div.informaltable p {
+	/* line-height: 1.1em; */
+}
+
+/* note, important special */
+div.note,
+.warning,
+.important {
+	background-color: #FFFFFF;
+	border: 1px solid #000000;
+}
+
+
+/* headers */
+h1 { font-size: 34px; line-height: 1.2; margin: 0.3em 0 10px; }
+h2 { font-size: 28px; line-height: 1.3; margin: 1em 0 .2em; }
+h3 { font-size: 24px; line-height: 1.3; margin: 1em 0 .2em; }
+h4 { font-size: 19px; margin: 1.33em 0 .2em; }
+h5 { font-size: 1.3em; margin: 1.67em 0; font-weight: bold; }
+h6 { font-size: 1.15em; margin: 1.67em 0; font-weight: bold; }
+
+/* center some titles */
+.book .title, .book .corpauthor, .book .copyright {
+	text-align: center;
+}
+
+/* decoration for formal examples */
+div.example {
+	padding-left: 15px;
+	border-style: solid;
+	border-width: 0px;
+	border-left-width: 2px;
+	border-color: black;
+	margin: 0.5ex;
+}
+
+
+/* less dense spacing of TOC */
+.booc .toc DL DT {
+	padding-top: 1.5ex;
+	padding-bottom: 1.5ex;
+}
+
+.book .toc DL DL DT {
+	padding-top: 0ex;
+	padding-bottom: 0ex;
+}
+
+/* miscellaneous */
+pre.literallayout, .screen, .synopsis, .programlisting {
+	margin-left: 4ex;
+}
+
+.comment	{ color: red; }
+
+var		{ font-family: monospace; font-style: italic; }
+/* Konqueror's standard style for ACRONYM is italic. */
+acronym		{ font-style: inherit; }
+
+.screen {
+	margin-right: 0.5in;
+}
+</style>
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="important" style="margin-left: 0.5in; margin-right: 0.5in; width:120px;">
+<a name="introduction" href="./quickstart-icinga-cn.html">简体中文</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a name="introduction" href="./quickstart-icinga-cn-tw.html">繁體中文</a></div>
+<div class="section" title="Icinga快速安装与配置">
+<div class="titlepage"><div><div><CENTER><h2 class="title" style="clear: both">
+<a name="quickstart-idoutils"></a>Icinga快速安装与配置</h2></CENTER></div></div></div>
+<div class="toc"><dl>
+<dt><span class="section">1.1. <a href="quickstart-icinga-cn.html#introduction">绪论</a></span></dt>
+<dt><span class="section">1.2. <a href="quickstart-icinga-cn.html#prerequisites">前提条件</a></span></dt>
+<dt><span class="section">1.3. <a href="quickstart-icinga-cn.html#installpackages">安装软件包</a></span></dt>
+<dt><span class="section">1.4. <a href="quickstart-icinga-cn.html#createaccount">创建帐户信息</a></span></dt>
+<dt><span class="section">1.5. <a href="quickstart-icinga-cn.html#compileinstallidoutils">编译和安装Icinga(包括IDOUtils)</a></span></dt>
+<dt><span class="section">1.5.1. <a href="quickstart-icinga-cn.html#compileinstall">编译和安装</a></span></dt>
+<dt><span class="section">1.6. <a href="quickstart-icinga-cn.html#customiseconfig">定制配置</a></span></dt>
+<dt><span class="section">1.6.1. <a href="quickstart-icinga-cn.html#enableidomod">启用idomod event broker 模块</a></span></dt>
+<dt><span class="section">1.7. <a href="quickstart-icinga-cn.html#createidoutilsdatabase">数据库创建和IDOUtils</a></span></dt>
+<dt><span class="section">1.8. <a href="quickstart-icinga-cn.html#configclassicui">配置经典的Web界面</a></span></dt>
+<dt><span class="section">1.9. <a href="quickstart-icinga-cn.html#compileinstallplugins">编译和安装Icing插件</a></span></dt>
+<dt><span class="section">2.0. <a href="quickstart-icinga-cn.html#selinuxsettings">调整SELinux的设置</a></span></dt>
+<dt><span class="section">2.1. <a href="quickstart-icinga-cn.html#startiido2dbandicinga">启动IDOUtils和Icinga</a></span></dt>
+<dt><span class="section">2.1.1. <a href="quickstart-icinga-cn.html#configstartup">配置Icinga开机启动</a></span></dt>
+<dt><span class="section">2.1.2. <a href="quickstart-icinga-cn.html#loginclassicui">登录到经典的Web界面</a></span></dt>
+<dt><span class="section">2.2. <a href="quickstart-icinga-cn.html#othermods">其它修改</a></span></dt>
+<dt><span class="section">2.3. <a href="quickstart-icinga-cn.html#clientconfig">客户端主机的配置</a></span></dt>
+<dt><span class="section">2.3.1 <a href="quickstart-icinga-cn.html#clientpluin">客户端编译和安装Icinga插件</a></span></dt>
+<dt><span class="section">2.3.2 <a href="quickstart-icinga-cn.html#clientnrpe">客户端编译和安装Nrpe</a></span></dt>
+<dt><span class="section">2.3.2 <a href="quickstart-icinga-cn.html#clientnrpeconf">配置客户端Nrpe</a></span></dt>
+</dl></div>
+  
+
+  <div class="section" title="1.1. 简述">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="introduction"></a>1.1. 简述</h3></div></div></div>
+    
+
+    <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">说明</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>如果没有安装Icinga,你可使用适用于您的操作系统的软件包. </p>
+
+      <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <p><a href="quickstart-icinga-cn.html#Debian/Ubuntu">Debian</a></p>
+        </li>
+<li class="listitem">
+          <p><a href="quickstart-icinga-cn.html#openSuSE">openSuSE</a></p>
+        </li>
+<li class="listitem">
+          <p><a href="quickstart-icinga-cn.html#RHEL/CentOS">RHEL/CentOS</a></p>
+        </li>
+</ul></div>
+
+      <p>如果你打算从源代码安装，那么请使用官方发布的压缩包.</p>
+    </td></tr>
+</table></div>
+
+    <div class="important" title="Important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">提示</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>除非你有问题，需要通过目前的开发版本来解决，否则请不要使用git快照.</p>
+    </td></tr>
+</table></div>
+    
+    <p>本指南旨在为您提供简单的如何从源(代码)安装Icinga的说明，并在20分钟内监控您的本地计算机.</p>
+
+    <p>这里不会对进阶安装选项进行讨论 - 只需基本操作大多数的用户就可以开始使用.</p>
+
+     <p>目前提供三种不同的Linux发行版的例子: <a class="link" href="http://fedoraproject.org/" target="_top">Fedora</a>, <a class="link" href="http://www.ubuntu.com/" target="_top">Ubuntu</a> 和 <a class="link" href="http://www.opensuse.org/" target="_top">openSuSE</a>. 类似发行版也可以正常使用. 这应该包括 <a class="link" href="http://www.redhat.com/" target="_top">RedHat</a>, <a class="link" href="http://www.centos.org/" target="_top">CentOS</a>, <a class="link" href="http://www.debian.org/" target="_top">Debian</a> 和 <a class="link" href="http://www.novell.com/products/server/" target="_top">SLES</a>.</p>
+
+ 
+
+    <p><span class="bold"><strong>最终您会得到结果是什么</strong></span></p>
+
+    <p>如果您按照这些说明操作,最终结果:</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p>Icinga和插件将安装到 /usr/local/icinga</p>
+      </li>
+<li class="listitem">
+        <p>配置Icinga监视您本地系统的几个方面 (CPU负载, disk使用率, 例如.)</p>
+      </li>
+<li class="listitem">
+        <p>Icinga经典web界面可以通过http://localhost/icinga/ 或 http://yourdomain.com/icinga访问</p>
+      </li>
+<li class="listitem">
+        <p>Icinga使用IDOUtils加载数据库</p>
+      </li>
+</ul></div>
+  </div>
+
+  <div class="section" title="1.2. 前提条件">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="prerequisites"></a>1.2. 前提条件</h3></div></div></div>
+    
+
+    <p>部分安装过程中，你需要具有root权限.</p>
+
+    <p>再继续安装之前,请确保你已经安装以下软件包. 如果安装IDOUtils,需要使用libdb和libdbi-drivers的开发库. 下面的例子将显示如何安装icinga和IDOUtils.</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p>Apache或Nginx</p>
+      </li>
+<li class="listitem">
+        <p>GCC 编译器</p>
+      </li>
+<li class="listitem">
+        <p>C/C++ 开发库</p>
+      </li>
+<li class="listitem">
+        <p>GD 开发库</p>
+      </li>
+<li class="listitem">
+        <p>libdbi/libdbi-drivers, 如MySQL或PostgreSQL数据库(如果不安装IDOUtils请跳过此部分)</p>
+
+        <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">说明</th>
+</tr>
+<tr><td align="left" valign="top">
+          <p>PostgreSQL: 由于INSERT语句的变化 PostgreSQL 8.1 无法再运作(2010年11月以来已经 <a class="link" href="http://wiki.postgresql.org/wiki/PostgreSQL_Release_Support_Policy" target="_top">结束产品生命期</a>), 所以请使用8.2或高于8.4的版本. 字符串转义在PostgreSQL 9.x处于实验阶段(请参阅 <a class="link" href="https://dev.icinga.org/issues/1974" target="_top">issue #1974</a>).</p>
+        </td></tr>
+</table></div>
+      </li>
+</ul></div>
+  </div>
+
+  <div class="section" title="1.3. 安装软件包">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="installpackages"></a>1.3. 安装软件包</h3></div></div></div>
+    
+
+    <p>1.3.1 您可以运行以下命令（以root或使用sudo）安装这些软件包.</p>
+
+    <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>如果没有发现相应软件包，请使用您的包管理器的搜索选项来获得新的不同版本之间的变化名称: </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+            <p><code class="code">yum search &lt;package name&gt;</code> ( <span class="emphasis"><em>Fedora/RHEL/CentOS</em></span> )</p>
+          </li>
+<li class="listitem">
+            <p><code class="code">apt-cache search &lt;package name&gt;</code> ( <span class="emphasis"><em>Debian/Ubuntu</em></span> )</p>
+          </li>
+<li class="listitem">
+            <p><code class="code">zypper search &lt;package name&gt;</code> ( <span class="emphasis"><em>openSuSE/SLES</em></span> )</p>
+          </li>
+</ul></div>
+    </td></tr>
+</table></div>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><a name="RHEL/CentOS"></a><span class="bold"><strong>Fedora/RHEL/CentOS:</strong></span></p>
+
+        <pre class="screen"> #&gt; yum install httpd gcc glibc glibc-common gd gd-devel
+ #&gt; yum install libjpeg libjpeg-devel libpng libpng-devel</pre>
+
+        <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+          <p>您可能需要使用到libjpeg-turbo和libjpeg-turbo-devel代替</p>
+        </td></tr>
+</table></div>
+
+        <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+            <p><span class="bold"><strong>MySQL:</strong></span></p>
+
+            <pre class="screen"> #&gt; yum install mysql mysql-server \
+    libdbi libdbi-devel libdbi-drivers libdbi-dbd-mysql</pre>
+          </li>
+<li class="listitem">
+            <p><span class="bold"><strong>PostgreSQL:</strong></span></p>
+
+            <pre class="screen"> #&gt; yum install postgresql postgresql-server \
+    libdbi libdbi-devel libdbi-drivers libdbi-dbd-pgsql</pre>
+          </li>
+</ul></div>
+      </li>
+<li class="listitem">
+        <p><a name="Debian/Ubuntu"></a><span class="bold"><strong>Debian/Ubuntu:</strong></span></p>
+
+        <pre class="screen"> #&gt; apt-get install apache2 build-essential libgd2-xpm-dev
+ #&gt; apt-get install libjpeg62 libjpeg62-dev libpng12 libpng12-dev</pre>
+
+        <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+          <p>Debian 6.0 / Ubuntu 10.10开始使用libpng-12-0包,  dev-package名称不变.</p>
+        </td></tr>
+</table></div>
+
+        <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+            <p><span class="bold"><strong>MySQL:</strong></span></p>
+
+            <pre class="screen"> #&gt; apt-get install mysql-server mysql-client libdbi1 libdbi-dev libdbd-mysql</pre>
+          </li>
+<li class="listitem">
+            <p><span class="bold"><strong>PostgreSQL:</strong></span></p>
+
+            <pre class="screen"> #&gt; apt-get install postgresql libdbi0 libdbi0-dev libdbd-pgsql</pre>
+          </li>
+</ul></div>
+      </li>
+<li class="listitem">
+        <p><a name="openSuSEs"></a><span class="bold"><strong>openSuSE:</strong></span></p>
+
+        <p>请使用YaST安装包 gd, gd-devel, libjpeg, libjpeg-devel, libpng, libpng-devel 和, optionally,
+        net-snmp, net-snmp-devel 和 perl-Net-SNMP.</p>
+
+        <p>使用zypper:</p>
+
+        <pre class="screen"> #&gt; zypper install gd gd-devel libjpeg libjpeg-devel libpng libpng-devel
+ #&gt; zypper install net-snmp net-snmp-devel perl-Net-SNMP</pre>
+
+        <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+          <p>开发包可能位于SDK DVDs.</p>
+        </td></tr>
+</table></div>
+
+        <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+            <p><span class="bold"><strong>MySQL:</strong></span></p>
+
+            <p>使用YaST安装RDBMS包,你要使用,例如. "mysql", "mysql-devel", "mysql-client" 和 libdbi
+            包s "libdbi", "libdbi-devel", "libdbi-drivers" 和 "libdbi-dbd-mysql", 或 alternatively <code class="filename">zypper</code>.</p>
+
+            <pre class="screen"> #&gt; zypper install mysql mysql-devel mysql-client \
+    libdbi libdbi-devel libdbi-drivers libdbi-dbd-mysql
+      </pre>
+
+            <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+              <p>在OpenSuSE 11 (SLES 11)中 "mysql-devel" 已更改为 "libmysqlclient-devel".</p>
+            </td></tr>
+</table></div>
+          </li>
+<li class="listitem">
+            <p><span class="bold"><strong>PostgreSQL:</strong></span></p>
+
+            <p>使用YaST安装RDBMS包,你要使用, 例如. "postgresql", "postgresql-devel", "postgresql-server"
+            和libdbi包 "libdbi", "libdbi-devel" and "libdbi-drivers", 或 alternatively <code class="filename">zypper</code>.</p>
+
+            <pre class="screen"> #&gt; zypper install postgresql postgresql-devel postgresql-server
+ #&gt; zypper install libdbi libdbi-devel libdbi-drivers</pre>
+          </li>
+</ul></div>
+ <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>使用旧的OpenSuSE (SLES)版本,包括版本10目前可能还没有任何libdbi包. 所以你必须下载并编译源代码. 您可以使用如mysql或pgsql代替所需的<rdbm>. 请记住，Oracle驱动程序还无法工作和请使用ocilib代替libdbi.</p>
+    </td></tr>
+</table></div>
+
+        <div class="orderedlist"><p>1.3.2 使用源码安装</p>
+        <p>首先需要确认gd是否支持TTC,如果不支持请重新编译gd</p><ol class="orderedlist" type="1">
+<li class="listitem">
+            <p>编译GD（freetype+libjpeg+libpng+fontconfig）</p>
+
+
+            <pre class="screen"> #&gt; tar zxvf libiconv-1.14.1.tar.gz
+ #&gt; cd libiconv-1.14.1
+ #&gt;./configure --prefix=/usr/local/libiconv 
+ #&gt; make 
+ #&gt; make install 
+ #&gt; /sbin/ldconfig</pre>
+ 			<pre class="screen"> #&gt; tar xvzf gd-2.0.35.tar.gz
+ #&gt; cd gd-2.0.35
+ #&gt; ./configure --prefix=/usr/local/gd2  --with-libiconv-prefix=/usr/local/libiconv
+ #&gt; make
+ #&gt; make install</pre>
+          </li>
+<li class="listitem">
+            <p>安装libdbi. 你还可以指定额外的配置选项(例如 --prefix=/usr ... )</p>
+
+            <pre class="screen"> #&gt; cd libdbi-0.8.3
+ #&gt; ./configure --disable-docs
+ #&gt; make
+ #&gt; make install</pre>
+          </li>
+<li class="listitem">
+            <p>安装libdbi-drivers</p>
+
+            <pre class="screen"> #&gt; cd libdbi-drivers-0.8.3-1
+ #&gt; ./configure --with-&lt;rdbm&gt; --disable-docs
+ #&gt; make
+ #&gt; make install</pre>
+ </li>
+<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+                <p>在64-bit版本上使用,你必须指定include-和lib-dir的路径:</p>
+
+                <pre class="screen"> #&gt; ./configure --with-&lt;rdbm&gt; \
+    --with-&lt;rdbm&gt;-incdir=/usr/include/&lt;rdbm&gt;/ \
+    --with-&lt;rdbm&gt;-libdir=/usr/lib64/ --disable-docs</pre>
+              </td></tr>
+</table></div>
+          </li>
+</ol></div>
+      </li>
+</ul></div>
+  </div>
+ 
+
+  <div class="section" title="1.4. 创建帐户信息">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="createaccount"></a>1.4. 创建帐户信息</h3></div></div></div>
+    
+
+    <pre class="screen"> $&gt; su -l</pre>
+
+    <p>创建一个新的<span class="emphasis"><em>Icinga</em></span>帐户,并设置一个密码.</p>
+
+    <pre class="screen"> #&gt; /usr/sbin/useradd -m icinga 
+ #&gt; passwd icinga </pre>
+
+    <p>在某些发行版本 你需要在这一个步骤中添加组:</p>
+
+    <pre class="screen"> #&gt; /usr/sbin/groupadd icinga</pre>
+
+
+    <pre class="screen"> #&gt; /usr/sbin/usermod -a -G icinga www-data</pre>
+
+    <p>(或 www, wwwrun, apache取决于发行版本)</p>
+
+
+  <div class="section" title="1.5. 编译和安装Icinga(包括IDOUtils)">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="compileinstallidoutils"></a>1.5. 编译和安装Icinga(包括IDOUtils)</h3></div></div></div>
+    
+
+    <p>提取Icinga源代码tarball</p>
+
+    <pre class="screen"> #&gt; tar jxvf icinga-cn-1.9.5.tar.gz 
+ #&gt; cd icinga-cn-1.9.5
+ #&gt; ./configure --prefix=/usr/local/icinga   --with-icinga-user=icinga -with-icinga-group=icinga \ 
+  --with-command-user=icinga --with-command-group=icinga   --with-mail=/usr/bin/mutt \
+  --with-httpd-conf=/etc/httpd/conf.d  --with-gd-lib=/usr/local/gd2/lib --with-gd-inc=/usr/local/gd2/include --enable-nanosleep --enable-event-broker</pre>
+  
+  <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>--enable-idoutils #数据库支持(默认)</p>
+      <p>--enable-embedded-perl  #启用嵌入式Perl解释器</p>
+      <p>--enable-ssl  #使本地的SSL支持</p>
+      <p>--with-mail  #设置邮件通知使用的程序，默认为Mutt.</p>
+      <p>--enable-oraclel  #启用oraclel支持.<br \>
+	     a.如果没有安装Oracle库路径，您需要指定--with-oracle-lib=/path/to/instantclient<br \>
+	     b.如果ocilib没有安装到默认路径(/usr/local), 您需要指定 --with-ocilib-lib=/path/to/ocilib/lib --with-ocilib-inc=/path/to/ocilib/include</p>
+    </td></tr>
+</table></div>
+
+    <p>此外，如果您要使用PostgreSQL将不宜使用参数--enable-pgsq， 因为它目前还不被支持.</p>
+
+
+<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+            <p>如果您想从Oracle作为MRDB, 您需要重新编译和安装IDOUtils!</p>
+            <p>Oracle使用IDOUtils1.5.0至少需要OCILIB3.9.2 - 不要安装3.9.0或3.9.1，因为它们仍然有bug。</p>
+          </td></tr>
+</table></div>
+<pre class="screen"> #&gt; make distclean
+ #&gt; ./configure --prefix=/usr/local/icinga   --with-icinga-user=icinga -with-icinga-group=icinga \ 
+  --with-command-user=icinga --with-command-group=icinga   --enable-idoutils \
+  --with-httpd-conf=/etc/httpd/conf.d  --enable-nanosleep --enable-event-broker</pre>
+      </li>
+</ul></div>
+  </div>
+
+  <div class="section" title="1.5.1. 编译和安装">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="compileinstall"></a>1.5.1. 编译和安装</h3></div></div></div>
+   
+
+    <pre class="screen"> #&gt; make all</pre>
+
+    <p>安装二进制文件, 初始化脚本, 配置文件样本, 一些事件处理函数, 和设置外部命令目录的权限.
+    </p>
+<pre class="screen"> #&gt; make install
+ #&gt; make install-init
+ #&gt; make install-config
+ #&gt; make install-eventhandlers
+ #&gt; make install-commandmode
+ #&gt; make install-idoutils </pre>
+<p> 或使用 </p>
+<pre class="screen"> #&gt; make fullinstall
+ #&gt; make install-config</pre>
+
+    <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>从Icinga 1.5.0开始 <code class="literal">make install-config</code> 不包括在 <code class="literal">make fullinstall
+      </code>中,以避免意外覆盖您的配置文件.</p>
+      <p>只要使用 "make install" 就可以安装IDOUtil和适用的event broker模块. </p>
+      <p>ldd ido2db查看加载模块</p>
+	  <p>libdbi.so.1 => /lib64/libdbi.so.1</p>
+	  <p>libdbi.so.1默认的路径是/lib64或/lib</p> 
+    </td></tr>
+</table></div>
+
+
+    <p>不要启动Icinga- 还有更多的事情需要做...</p>
+  </div>
+
+  <div class="section" title="1.6. Customise Configuration">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="customiseconfig"></a>1.6. 定制配置</h3></div></div></div>
+    
+
+    <p>使用 "make install-config" 安装简单配置文件到 <code class="filename">/usr/local/icinga/etc/</code>
+
+    <pre class="screen"> #&gt; cd /usr/local/icinga/etc/
+ #&gt; vi idomod.cfg
+ #&gt; vi ido2db.cfg</pre>
+
+    <p>如果启用 --enable-ssl, 您需要更改
+    idomod.cfg文件:</p>
+
+    <pre class="programlisting"> use_ssl=1
+ output_type=tcpsocket
+ output=127.0.0.1</pre>
+
+    <p>如果您的数据库没有位于本机,您需要更改ido2db.cfg:</p>
+
+    <pre class="programlisting"> use_ssl=1
+ socket_type=tcp </pre>
+
+    <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>如果在ido2db上启用SSL, 但对于不同的idomod客户端 - 将会出现数据丢失现象 - 需要在所有的节点上做相同的SSL配置!!!</p>
+    </td></tr>
+</table></div>
+  </div>
+
+  <div class="section" title="1.6.1. 启用idomod event broker 模块">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="enableidomod"></a>1.6.1. 启用idomod event broker 模块</h3></div></div></div>
+    
+
+    <div class="important" title="Important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">提示</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>在正常情况下，下面的模块定义已经存在于<code class="filename">modules</code>/idoutils.cfg-sample
+      </p>
+<pre class="programlisting">
+	define module{
+        module_name     idomod
+        module_type     neb
+        path            /usr/local/icinga/lib/idomod.so
+        args            config_file=/usr/local/icinga/etc/idomod.cfg
+	}</pre>
+<p>  所以没有必要编辑主配置文件启用broker_module条目!</p>
+<pre class="screen"> #&gt; mv idoutils.cfg-sample idoutils.cfg</pre>
+    </td></tr>
+</table></div>
+  </div>
+
+  <div class="section" title="1.7. 数据库创建和IDOUtils">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="createidoutilsdatabase"></a>1.7.数据库创建和IDOUtils</h3></div></div></div>
+    
+
+    <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>如果刚安装了一个新的数据库系统,在您创建新数据库之前,你必须启动数据库服务. 如
+      MySQL可能使用 <code class="code">/etc/init.d/mysqld start</code> (或 <code class="code">/etc/init.d/mysql</code>, 这取决于您的发行版本).</p>
+    </td></tr>
+</table></div>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><span class="bold"><strong>MySQL:</strong></span></p>
+
+        <p>创建数据库,用户, 授权:</p>
+
+        <pre class="screen"> #&gt; mysql -u root -p
+ mysql&gt; CREATE DATABASE icinga;
+
+ GRANT USAGE ON icinga.* TO 'icinga'@'localhost'
+   IDENTIFIED BY 'icinga'
+   WITH MAX_QUERIES_PER_HOUR 0
+   MAX_CONNECTIONS_PER_HOUR 0
+   MAX_UPDATES_PER_HOUR 0;
+
+ GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE
+   ON icinga.* TO 'icinga'@'localhost';
+  
+ FLUSH PRIVILEGES;
+
+ quit</pre>
+
+        <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+          <p>从Icinga 1.8 开始icinga用户另外需要EXECUTE权限.</p>
+        </td></tr>
+</table></div>
+
+        <p>向MySQL导入数据库架构:</p>
+
+        <pre class="screen"> #&gt; cd /path/to/icinga-src/module/idoutils/db/mysql
+ #&gt; mysql -u root -p icinga &lt; mysql.sql</pre>
+ 
+  <p>升级MySQL数据库:</p>
+
+        <pre class="screen"> #&gt; cd /path/to/icinga-src/module/idoutils/db/mysql/upgrade
+ #&gt; mysql -u root -p icinga &lt; mysql-upgrade-x.sql</pre>
+
+        <p>编辑DB配置文件自定义IDOUtils</p>
+
+        
+
+        <pre class="screen"> #&gt; vi /usr/local/icinga/etc/ido2db.cfg</pre>
+
+        <pre class="programlisting"> db_servertype=mysql
+ db_port=3306
+ db_user=icinga
+ db_pass=icinga</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>PostgreSQL:</strong></span></p>
+
+        <p>创建数据库和用户:</p>
+
+        <pre class="screen"> #&gt; su - postgres
+ 
+ $ psql
+ postgres=# CREATE USER icinga;
+ postgres=# ALTER USER icinga WITH PASSWORD 'icinga';
+ postgres=# CREATE DATABASE icinga;
+ postgres=# \q
+ $ createlang plpgsql icinga;</pre>
+
+        <p>从PostgreSQL 9.1开始 "createlang ..."已经过时.</p>
+
+        <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+            <p><span class="bold"><strong>Debian:</strong></span></p>
+
+            <pre class="screen"> #&gt; vi /etc/postgresql/8.x/main/pg_hba.conf</pre>
+          </li>
+<li class="listitem">
+            <p><span class="bold"><strong>Fedora/RHEL/CentOS:</strong></span></p>
+
+            <pre class="screen"> #&gt; vi /var/lib/pgsql/data/pg_hba.conf</pre>
+          </li>
+</ul></div>
+
+        <p>编辑配置文件 例如. 这样 (本地用户必须信任)</p>
+
+        <pre class="programlisting"> # database administrative login by UNIX sockets
+ local    all        postgres                  ident
+ # TYPE   DATABASE   USER       CIDR-ADDRESS   METHOD 
+ #icinga
+ local    icinga     icinga                    trust
+ # "local" is for Unix domain socket connections only
+ local    all        all                       trust
+ # IPv4 local connections
+ host     all        all        127.0.0.1/32   md5
+ # IPV6 local connections
+ host     all        all        ::1/128        md5</pre>
+
+        <p>重新载入和配置数据库架构.</p>
+
+        <pre class="screen"> #&gt; /etc/init.d/postgresql-8.x reload</pre>
+
+        <pre class="screen"> #&gt; cd /path/to/icinga-src/module/idoutils/db/pgsql
+ #&gt; psql -U icinga -d icinga &lt; pgsql.sql</pre>
+ 
+      <p>升级PostgreSQL数据库.</p>
+
+
+        <pre class="screen"> #&gt; cd /path/to/icinga-src/module/idoutils/db/pgsql/upgrade
+ #&gt; psql -U icinga  -d icinga &lt; pgsql-upgrade-x.sql</pre>
+
+        <p>编辑DB配置文件自定义IDOUtils</p>
+
+        <pre class="screen"> #&gt; vi /usr/local/icinga/etc/ido2db.cfg</pre>
+
+        <pre class="programlisting"> db_servertype=pgsql
+ db_port=5432
+ db_user=icinga
+ db_pass=icinga</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Oracle:</strong></span></p>
+
+        <p>创建一个数据库结构描述和用户名/密码 (请参阅Oracle文档 http://www.oracle.com ，或咨询您的DBA).
+        使用sqlplus导入数据库结构描述 (或 您的首选方法). 复制 <code class="filename">module/idoutils/db/oracle/*</code> 到
+        $ORACLE_HOME 和编辑 <code class="filename">icinga_defines.sql</code> 以匹配表空间和用户认证信息.</p>
+
+        <pre class="screen"> #&gt; su - oracle
+ $&gt; sqlplus dbuser/dbpass
+ SQL&gt; @oracle.sql</pre>
+
+        <p>编辑DB配置文件自定义IDOUtils. 请记住Oracle忽略的db主机, 代替指向 db_name 到
+        //DBSERVER/DBNAME</p>
+
+        <pre class="screen"> #&gt; vi /usr/local/icinga/etc/ido2db.cfg</pre>
+
+        <pre class="programlisting">  db_servertype=oracle
+  db_port=1521
+  db_user=icinga
+  db_pass=icinga</pre>
+      </li>
+</ul></div>
+  </div>
+
+  <div class="section" title="1.8.  配置经典的Web界面">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="configclassicui"></a>1.8.  配置经典的Web界面</h3></div></div></div>
+    
+
+    <p>安装Icinga附带的经典web界面("CGIs")</p>
+
+    <pre class="screen"> #&gt; make cgis
+ #&gt; make install-cgis
+ #&gt; make install-html</pre>
+
+    <p>安装经典web配置文件到Apache的conf.d目录下.</p>
+
+    <pre class="screen"> #&gt; make install-webconf</pre>
+
+    <p>创建 <span class="emphasis"><em>icingaadmin</em></span> 账户,登录到Icinga经典web界面. 记住您分配给这个帐户的密码 -稍后你会需要它.</p>
+
+    <pre class="screen"> #&gt; htpasswd -c /usr/local/icinga/etc/htpasswd.users icingaadmin</pre>
+
+    <p>如果你想改变用户密码，或添加另一个用户，请使用以下命令:</p>
+
+    <pre class="screen"> #&gt; htpasswd /usr/local/icinga/etc/htpasswd.users &lt;USERNAME&gt;</pre>
+
+    <div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>这取决于您的发行版本和Apache版本,您还可能使用到 <span class="emphasis"><em>htpasswd2</em></span> 代替.</p>
+    </td></tr>
+</table></div>
+
+    <p>重新载入/重新启动Apache使新的设置生效.</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><span class="bold"><strong>Fedora/RHEL/CentOS:</strong></span></p>
+
+        <pre class="screen"> #&gt; service httpd restart</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Ubuntu/openSuSE:</strong></span></p>
+
+        <pre class="screen"> #&gt; service apache2 restart</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Debian:</strong></span></p>
+
+        <pre class="screen"> #&gt; /etc/init.d/apache2 reload</pre>
+      </li>
+</ul></div>
+  </div>
+
+  <div class="section" title="1.9. 编译和安装Icing插件">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="compileinstallplugins"></a>1.9. 编译和安装Icing插件</h3></div></div></div>
+
+    <pre class="screen">#&gt; tar -jxvf nagios-cn-plugins-1.5.tar.bz2
+ #&gt; cd nagios-cn-plugins-1.5  </pre>
+
+    <p>编译并安装插件安装到目录<code class="filename">/usr/local/icinga</code></p>
+
+    <pre class="screen"> #&gt; ./configure --prefix=/usr/local/icinga \
+    --with-package-name=icinga-plugins \
+    --with-icinga-user=icinga --with-icinga-group=icinga 
+ #&gt; make 
+ #&gt; make install </pre>
+  </div>
+<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>#查看播件文件是否已安装在这个目录</p>
+      <p>ls /usr/local/icinga/libexec</p>
+    </td></tr>
+</table></div>
+
+  <div class="section" title="1.9.1. 安装check_nrpe 插件">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="compileinstallplugins"></a>1.9.1. 安装check_nrpe 插件</h3></div></div></div>
+
+    <pre class="screen">#&gt; tar -zxvf nrpe-2.14.tar.gz  
+ #&gt; cd nrpe-2.14   
+ #&gt; ./configure --prefix=/usr/local/icinga --enable-ssl 
+ #&gt; make all
+ #&gt; make install-plugin</pre>
+  </div>
+
+   <div class="section" title="2.0. 调整SELinux的设置">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="selinuxsettings"></a>2.0. 调整SELinux的设置</h3></div></div></div>
+
+   <p>RHEL和衍生版本(如Fedora和CentOS) 出厂时激活了SELinux(Security Enhanced Linux) 并运行在"enforcing"模式. 当你尝试调用Icinga-CGIs时,可能导致 "内部服务器错误" 消息.</p>
+
+   <p>检查SELinux是否运行在enforcing模式</p>
+
+    <pre class="screen">#&gt; getenforce </pre>
+
+    <p>设置SELinux处于"permissive"模式</p>
+
+     <pre class="screen">#&gt; setenforce 0</pre>
+
+     <p>如果要永久更改，你必须调整/etc/selinux/config中的该设置并重新启动系统.</p>
+
+     <p>如果不停用SELinux或将它设置成permissive模式,您可以在enforcing/targeted模式下,使用下面的命令来运行CGIs:</p>
+
+    <pre class="programlisting"> #&gt; chcon -R -t httpd_sys_script_exec_t /usr/local/icinga/sbin/
+ #&gt; chcon -R -t httpd_sys_content_t /usr/local/icinga/share/
+ #&gt; chcon -R -t httpd_sys_script_rw_t /usr/local/icinga/var/rw/</pre>
+    <p>此外你也可以看看这个 <a class="link" href="http://www.linuxquestions.org/questions/blog/sag47-492023/selinux-and-icinga-34926/" target="_top">http://www.linuxquestions.org/questions/blog/sag47-492023/selinux-and-icinga-34926/</a>.</p>
+  </div>
+
+  <div class="section" title="2.1. 启动IDOUtils和Icinga">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="startiido2dbandicinga"></a>2.1. 启动IDOUtils和Icinga</h3></div></div></div>
+    
+
+    <p>在启动Icinga<span class="emphasis"><em>之前</em></span>必须先启动和运行IDOUtils.</p>
+
+    <p><span class="emphasis"><em>启动 IDOUtils:</em></span></p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><span class="bold"><strong> Fedora/RHEL/CentOS/Ubuntu/openSuSE:</strong></span></p>
+
+        <pre class="screen"> #&gt; service ido2db start</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Debian:</strong></span></p>
+
+        <pre class="screen"> #&gt; /etc/init.d/ido2db start</pre>
+      </li>
+</ul></div>
+
+    <p><span class="emphasis"><em>停止 IDOUtils:</em></span></p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><span class="bold"><strong> Fedora/RHEL/CentOS/Ubuntu/openSuSE:</strong></span></p>
+
+        <pre class="screen"> #&gt; service ido2db stop</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Debian:</strong></span></p>
+
+        <pre class="screen"> #&gt; /etc/init.d/ido2db stop</pre>
+      </li>
+</ul></div>
+
+    <p>验证Icinga的配置文件样本.</p>
+
+    <pre class="screen"> #&gt; /usr/local/icinga/bin/icinga -v /usr/local/icinga/etc/icinga.cfg </pre>
+
+    <p>一切正常将显示OK信息。如何有任何错误将会显示相应错误出现的未知. 启动 Icinga.</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><span class="bold"><strong> Fedora/RHEL/CentOS/Ubuntu/openSuSE:</strong></span></p>
+
+        <pre class="screen"> #&gt; service icinga start</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Debian:</strong></span></p>
+
+        <pre class="screen"> #&gt; /etc/init.d/icinga start</pre>
+      </li>
+</ul></div>
+  </div>
+
+  <div class="section" title="2.1.1. 配置Icinga开机启动">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="configstartup"></a>2.1.1. 配置Icinga开机启动</h3></div></div></div>
+    
+
+    <p>添加Icinga到服务列表和在系统启动时自动启动 (在次之前确保您已经安装了init脚本).</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><span class="bold"><strong>Fedora/RHEL/CentOS/openSuSE:</strong></span></p>
+
+        <pre class="screen"> #&gt; chkconfig --add icinga chkconfig icinga on</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Debian/Ubuntu:</strong></span></p>
+
+        <pre class="screen"> #&gt; update-rc.d icinga defaults</pre>
+      </li>
+</ul></div>
+  </div>
+
+  <div class="section" title="2.1.2. 登录到经典的Web界面">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="loginclassicui"></a>2.1.2. 登录到经典的Web界面</h3></div></div></div>
+    
+
+    <p>通过下面的网址,您现在应该能够访问到Icinga的经典Web界面. 系统将提示您先前指定的用户名 (
+    <span class="emphasis"><em>例如. icingaadmin</em></span> ) 和密码. </p>
+<pre class="screen"> http://localhost/icinga/</pre>
+<p> 或 </p>
+<pre class="screen"> http://yourdomain.com/icinga/ </pre>
+  </div>
+
+  <div class="section" title="2.2. 其它修改">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="othermods"></a>2.2. 其它修改</h3></div></div></div>
+    
+
+    <p>请确保您的系统的防火墙规则配置为允许访问到Web服务器,如果您要远程访问的Icinga的经典Web界面.</p>
+
+    <pre class="screen"> #&gt; iptables -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT</pre>
+  </div>
+
+  <div class="section" title="2.3. 客户端主机的配置">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="clientconfig"></a>2.3. 客户端主机的配置</h3></div></div></div>
+ <p>添加用户（普通账户）icinga</p>
+	<pre class="screen"> #&gt; /usr/sbin/useradd icinga
+ #&gt; passwd icinga</pre>
+ 
+  <div class="section" title="2.3.1. 客户端编译和安装Icinga插件">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="clientpluin"></a>2.3.1. 客户端编译和安装Icinga插件</h3></div></div></div>
+    <pre class="screen"> #&gt; tar jxvf nagios-cn-plugins-1.5.tar.bz2
+ #&gt; cd nagios-cn-plugins-1.5 
+ #&gt; ./configure -prefix=/usr/local/icinga \
+  --with-package-name=icinga-plugins \
+  --with-nagios-user=icinga --with-nagios-group=icinga 
+ #&gt; make
+ #&gt; make install</pre>
+<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>#查看播件文件是否已安装在这个目录</p>
+      <p>ls /usr/local/icinga/libexec</p>
+    </td></tr>
+</table></div>
+<div class="section" title="2.3.2. 客户端编译和安装Nrpe">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="clientnrpe"></a>2.3.2. 客户端编译和安装Nrpe</h3></div></div></div>
+ <pre class="screen"> #&gt; tar xvzf icinga-nrpe-2.14.tar.gz
+ #&gt; cd icinga-nrpe-2.14  
+ #&gt; ./configure --prefix=/usr/local/icinga --with-nrpe-user=icinga --with-nrpe-group=icinga \ 
+ --with-icinga-user=icinga --with-icinga-group=icinga
+ #&gt; make all
+ #&gt; make install
+ #&gt; make install-plugin
+ #&gt; make install-daemon
+ #&gt; make install-daemon-config
+ #&gt; make install-init</pre>
+ <div class="section" title="2.3.3. 客户端编译和安装Nrpe">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="clientnrpeconf"></a>2.3.3. 配置客户端Nrpe</h3></div></div></div>
+ <p>添加nrpe服务器地址，允许服务器对其读取信息</p>
+ <pre class="screen"> #&gt; vi /usr/local/icinga/etc/nrpe.cfg
+ #&gt; allowed_hosts=127.0.0.1,IPADDRESS</pre>
+ <p>增加command字段来添加要监控的服务</p><pre class="programlisting">
+ command[check_users]=/usr/local/icinga/libexec/check_users -w 5 -c 10
+ command[check_load]=/usr/local/icinga/libexec/check_load -w 15,10,5 -c 30,25,20
+ command[check_hda1]=/usr/local/icinga/libexec/check_disk -w 20% -c 10% -p /dev/hda1 
+ command[check_zombie_procs]=/usr/local/icinga/libexec/check_procs -w 5 -c 10 -s Z 
+ command[check_total_procs]=/usr/local/icinga/libexec/check_procs -w 150 -c 200  
+ command[check_ssh]=/usr/local/icinga/libexec/check_ssh -H localhost 
+ command[check_swap]=/usr/local/icinga/libexec/check_swap -w 20% -c 10% 
+ command[check_mysql]=/usr/local/icinga/libexec/check_mysql -H localhost -uroot -ptomcat2008 
+ command[check_apache]=/usr/local/icinga/libexec/check_apachestatus -H localhost -p 80 
+ command[check_ntp]=/usr/local/icinga/libexec/check_ntp -H localhost -w 0.5 -c 1 
+ command[check_snmp]=/usr/local/icinga/libexec/check_snmp_service -H localhost -C monitor_energysh </pre> 
+ <p>启动Nrpe</p>
+ 
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+        <p><span class="bold"><strong>Fedora/RHEL/CentOS:</strong></span></p>
+
+        <pre class="screen"> #&gt; service icinga-nrpe start</pre>
+      </li>
+<li class="listitem">
+        <p><span class="bold"><strong>Debian/Ubuntu/openSuSE:</strong></span></p>
+
+        <pre class="screen"> #&gt; /etc/init.d/icinga-nrpe start 
+ 或
+ #&gt;  service icinga-nrpe start</pre>
+      </li>
+</ul></div>
+<div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"></td>
+<th align="left">备注</th>
+</tr>
+<tr><td align="left" valign="top">
+      <p>检测服务端check_nrpe与客户端运行的nrpedaemon之间的通信</p>
+      <p>/usr/local/icinga/libexec/check_nrpe -H ClientIPADDRESS </p>
+    </td></tr>
+</table></div>
+  </div>
+</div>
+</div>
+<P class="copyright">© 2009-2013 Icinga Development Team, http://www.icinga.org</P>
+<P class="copyright">© 2009-2013 Icinga 中文化项目组, http://sourceforge.net/projects/icinga-cn</P>
+</body>
+</html>
